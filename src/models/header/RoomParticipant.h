@@ -15,6 +15,8 @@ class RoomParticipant {
         bool is_spectator;
         bool is_ready;
         time_t joined_at;
+
+    
 };
 
 #endif

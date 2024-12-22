@@ -16,6 +16,9 @@ public:
     time_t created_at;
     time_t last_login; 
     
+    void banPlayer(int player_id);
+    void viewPlayerList();
+    
 };
 
 #endif
