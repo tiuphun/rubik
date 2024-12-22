@@ -11,11 +11,11 @@ enum RoomStatus{
     WAITING,
     READY,
     IN_PROGRESS,
-    COMPLETED
+    ENDED
 };
 
 enum GameSessionStatus{
-    IN_PROGRESS,
+    IN_SESSION,
     COMPLETED
 };
 
@@ -25,8 +25,8 @@ enum PlayerGameSessionStatus{
 };
 
 enum ValidationStatus{
-    success,
-    fail
+    SUCCESS,
+    FAIL
 };
 
 #endif 
