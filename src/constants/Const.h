@@ -21,12 +21,8 @@ enum GameSessionStatus{
 
 enum PlayerGameSessionStatus{
     PLAYING,
-    ABANDONED
-};
-
-enum ValidationStatus{
-    success,
-    fail
+    ABANDONED,
+    FINISHED
 };
 
 #endif 

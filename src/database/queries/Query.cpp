@@ -17,7 +17,9 @@ const char* Query::CREATE_PLAYER_TABLE =
     "avg_time REAL DEFAULT 0,"
     "status TEXT DEFAULT 'INACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE', 'BANNED')),"
     "ban_date DATETIME,"
-    "ban_by INTEGER);";
+    "ban_by INTEGER"
+    "FOREIGN KEY (ban_by) REFERENCES Admin(id));"
+    ;
 
 const char* Query::INSERT_PLAYER = 
     "INSERT INTO Player(username,password_hash) "
@@ -130,7 +132,8 @@ const char* Query::CREATE_GAME_MOVE_TABLE =
     "player_game_session_id INTEGER NOT NULL, "
     "move TEXT NOT NULL, "
     "move_order INTEGER NOT NULL, "
-    "move_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP"
+    "move_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,"
+    "FOREIGN KEY (player_game_session_id) REFERENCES PlayerGameSession(id) ON DELETE CASCADE,"
     ");";
 
 const char* Query::CREATE_CUBE_STATE_TABLE =
@@ -140,7 +143,7 @@ const char* Query::CREATE_CUBE_STATE_TABLE =
     "validated INTEGER DEFAULT 1 CHECK(validated IN (1, 0)), "
     "cube TEXT, "
     "validation_timestamp DATETIME, "
-    "validation_result TEXT CHECK(validation_result IN ('success', 'fail'))"
+    "FOREIGN KEY (player_game_session_id) REFERENCES PlayerGameSession(id),"
     ");";
 
 
