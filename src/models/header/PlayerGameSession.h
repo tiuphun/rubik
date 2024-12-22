@@ -21,6 +21,8 @@ public:
     time_t completion_time;
     int cube_state_id;
 
+    void startGameSession(int game_session_id, int player_id, string initial_cube_state);
+    void endGameSession(int player_id);
 };
 
 #endif

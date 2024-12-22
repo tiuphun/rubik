@@ -18,7 +18,10 @@ public:
     int max_players;
     int max_spectators;
     RoomStatus status;
-   
+    
+    int createRoom(int created_by, int max_players, int max_spectators);
+    void joinRoom(Player player_id);
+    void leaveRoom(Player player_id);
 };
 
 #endif

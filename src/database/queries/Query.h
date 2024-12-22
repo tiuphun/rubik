@@ -38,7 +38,7 @@ class Query {
    static const char* CREATE_CUBE_STATE_TABLE;
    static const char* INSERT_CUBE_STATE;
 
-
+   
 };
 
 #endif

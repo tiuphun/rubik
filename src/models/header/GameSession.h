@@ -19,6 +19,9 @@ public:
     GameSessionStatus status;
     string initial_cube_state;
     int winner_id;
+
+    void startGame(int room_id, string initial_cube_state);
+    void endGame(int winner_id);
 };
 
 #endif

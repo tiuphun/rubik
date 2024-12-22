@@ -17,6 +17,8 @@ class CubeState{
     string cube;
     time_t validation_timestamp;
     ValidationStatus validation_result;
+
+    bool validateCube(string cube);
 };
 
 #endif
