@@ -14,6 +14,12 @@ enum RoomStatus{
     ENDED
 };
 
+enum RoomParticipantStatus{
+    PLAYER,
+    PLAYER_SPECTATOR,
+    ADMIN_SPECTATOR
+};
+
 enum GameSessionStatus{
     IN_SESSION,
     COMPLETED
@@ -21,7 +27,8 @@ enum GameSessionStatus{
 
 enum PlayerGameSessionStatus{
     PLAYING,
-    ABANDONED
+    ABANDONED,
+    FINISHED
 };
 
 enum ValidationStatus{
