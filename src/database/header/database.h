@@ -2,21 +2,17 @@
 #define DATABASE_H
 
 #include <sqlite3.h>
+#include <string.h>
+#include <vector>
 
-/**
- * Hàm mở kết nối đến SQLite
- * Tham số: Tên database và object sqlite3 để hold connection
- */
-int db_init(const char *db_name, sqlite3 ** db);
-/**
- * Hàm thực thi một SQL query
- * Tham số: sqlite3 object và SQL query
- */
-int db_exec(sqlite3 *db, const char *sql);
-/**
- * Hàm đóng kết nối SQLite database
- * Tham số: sqlite3 ọbject
- */
-void db_close(sqlite3 *db);
+using namespace std;
 
-#endif 
+class Database {
+public:
+    static int db_init(const char *db_name, sqlite3 **db);
+    static int db_exec(sqlite3 *db, const char *sql);
+    static void db_close(sqlite3 *db);
+    static int db_prepare_exec(sqlite3 *db, const char *sql, const vector<string> &params);
+};
+
+#endif // DATABASE_H

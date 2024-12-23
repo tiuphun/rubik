@@ -16,7 +16,7 @@ class RoomParticipant {
         bool is_ready;
         time_t joined_at;
 
-    
+    void leaveRoom(RoomParticipant id);
 };
 
 #endif

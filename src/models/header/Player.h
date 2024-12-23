@@ -34,7 +34,12 @@ public:
         is_logged_in = false;
     }
     */
+    int createRoom(int created_by, int max_players, int max_spectators);
+    void joinRoom(Player player_id);
     
+    void readyRequestResponse(int player_id) {
+        // update is_ready trong bang Room Participant voi player_id tuong ung 
+    };
 
     
 };

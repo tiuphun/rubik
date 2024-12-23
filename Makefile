@@ -13,7 +13,7 @@ SRCS = $(wildcard $(SRC_DIR)/main/*.cpp) \
        $(wildcard $(SRC_DIR)/server/*.cpp) \
        $(wildcard $(SRC_DIR)/database/queries/*.cpp) \
 	   $(wildcard $(SRC_DIR)/database/functions/*.cpp) \
-       $(wildcard $(SRC_DIR)/models/entities/*.cpp)
+       $(wildcard $(SRC_DIR)/models/entities/*.cpp) 
 
 # Object files
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)

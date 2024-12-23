@@ -6,6 +6,9 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sqlite3.h>
+#include "../database/header/database.h"
+#include "../database/queries/Query.h"
 
 using namespace std;
 
@@ -14,12 +17,16 @@ using namespace std;
 class Server {
 public:
     Server();
+    sqlite3 *db; //Database holder
+    const char* db_path = "/Volumes/DATA/repository/rubikServer/rubik/src/database/migration/Rubik.db"; //Absolute path
     void start();
     void handle_client(int client_socket);
     
 private:
+
     unordered_map<string, string> load_users();
     void save_user(const string& username, const string& password);
+
     void sign_up(int client_socket, const string& username, const string& password);
     void sign_in(int client_socket, const string& username, const string& password);
     
@@ -27,6 +34,8 @@ private:
 };
 
 Server::Server() {
+
+
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
         cerr << "Failed to create socket\n";
@@ -49,55 +58,27 @@ Server::Server() {
     }
 
     cout << "Server listening on port " << PORT << "...\n";
-}
-
-unordered_map<string, string> Server::load_users() {
-    unordered_map<string, string> users;
-    ifstream file("data/accounts.txt");
-    string line;
+    /* Database init after socket init:
+    */
+    cout << "Loading Database..." << "\n";
+    cout << "Database path:" << db_path << "\n";
     
-    while (getline(file, line)) {
-        istringstream ss(line);
-        string username, password;
-        ss >> username >> password;
-        users[username] = password;
+    int rc = Database::db_init(db_path, &db);
+    if(rc != SQLITE_OK){
+        cerr << "Database init failed\n";
+        close(server_socket);
+        exit(1);
     }
-    
-    return users;
-}
 
-void Server::save_user(const string& username, const string& password) {
-    ofstream file("data/accounts.txt", ios_base::app);
-    file << username << " " << password << "\n";
+    cout << "Database initialization successful!\n"; 
 }
 
 void Server::sign_up(int client_socket, const string& username, const string& password) {
-    unordered_map<string, string> users = load_users();
     
-    if (users.find(username) != users.end()) {
-        string msg = "Username already exists.\n";
-        send(client_socket, msg.c_str(), msg.length(), 0);
-    } else {
-        save_user(username, password);
-        string msg = "Account created successfully. Please sign in.\n";
-        send(client_socket, msg.c_str(), msg.length(), 0);
-    }
 }
 
 void Server::sign_in(int client_socket, const string& username, const string& password) {
-    unordered_map<string, string> users = load_users();
-    
-    auto it = users.find(username);
-    if (it == users.end()) {
-        string msg = "Username not found. Please sign up first.\n";
-        send(client_socket, msg.c_str(), msg.length(), 0);
-    } else if (it->second == password) {
-        string msg = "Welcome, " + username + "!\n";
-        send(client_socket, msg.c_str(), msg.length(), 0);
-    } else {
-        string msg = "Incorrect password.\n";
-        send(client_socket, msg.c_str(), msg.length(), 0);
-    }
+   
 }
 
 void Server::handle_client(int client_socket) {
@@ -118,7 +99,7 @@ void Server::handle_client(int client_socket) {
 
         cout << "Received: " << message << endl;
 
-        if (message.substr(0, 7) == "SIGNUP ") {
+        if (message.substr(0, 7) == "BAN_PLAYER_REQUEST") {
             istringstream ss(message.substr(7));
             string username, password;
             ss >> username >> password;
