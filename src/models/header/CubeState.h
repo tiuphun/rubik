@@ -13,12 +13,9 @@ class CubeState{
 public: 
     int id;
     int player_game_session_id;
-    bool validated;
     string cube;
     time_t validation_timestamp;
     ValidationStatus validation_result;
-
-    
 };
 
 #endif
