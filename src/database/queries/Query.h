@@ -10,6 +10,7 @@ public:
     static const char* CREATE_ADMIN_TABLE;
     static const char* INSERT_ADMIN;
     static const char* SELECT_ALL_ADMIN;
+    static const char* BAN_PLAYER;
 
     // Player Queries
     static const char* CREATE_PLAYER_TABLE;
@@ -21,12 +22,16 @@ public:
     static const char* INSERT_ROOM;
     static const char* SELECT_ALL_ROOM;
     static const char* SELECT_ROOM_BY_ID;
+    static const char* SELECT_ALL_AVAILABLE_ROOM;
+    static const char* CHECK_ROOM_STATUS;
 
     // RoomParticipant Queries
     static const char* CREATE_ROOM_PARTICIPANT_TABLE;
     static const char* INSERT_ROOM_PARTICIPANT;
     static const char* SELECT_ALL_ROOM_PLAYERS_BY_ROOM_ID;
     static const char* SELECT_ALL_ROOM_SPECTATORS_BY_ROOM_ID;
+    static const char* DELETE_FROM_ROOM_PARTICIPANT;
+    static const char* UPDATE_ROOM_PARTICIPANT_READY;
 
     // GameSession Queries
     static const char* CREATE_GAME_SESSION_TABLE;

@@ -6,6 +6,8 @@
 #include <string>
 #include <unordered_map>
 #include <netinet/in.h>
+#include <sqlite3.h>
+#include "../services/UserService.h"
 
 #define PORT 8080
 
@@ -13,18 +15,16 @@ using namespace std;
 
 class Server {
 public:
-    Server();                       // Constructor
-    // ~Server();                      // Destructor
-    void start();                   // Starts the server
-    void handle_client(int client_socket); // Handles client communication
+    Server();                     
+    void start();                 
+    void handleClient(int client_socket); 
+    void processMessage(const string& message, int client_socket);
 
 private:
-    unordered_map<string, string> load_users(); // Load users from file
-    void save_user(const string& username, const string& password); // Save user to file
-    void sign_up(int client_socket, const string& username, const string& password); // Sign up logic
-    void sign_in(int client_socket, const string& username, const string& password); // Sign in logic
-
-    int server_socket; // Server socket descriptor
+    int server_socket; 
+    sqlite3 *db;
+    const char* db_path = "/Volumes/DATA/repository/rubikServer/rubik/src/database/migration/Rubik.db";
+    UserService userService;
 };
 
 #endif

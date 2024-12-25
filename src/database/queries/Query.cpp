@@ -152,6 +152,9 @@ const char* Query::INSERT_ADMIN =
 const char* Query::SELECT_ALL_ADMIN =
     "SELECT * FROM Admin;";
 
+const char* Query::BAN_PLAYER =
+    "UPDATE Player SET status = 'BANNED', ban_by = ? WHERE id = ?;";
+    
 // Player Queries
 const char* Query::CREATE_PLAYER_TABLE = 
     "CREATE TABLE IF NOT EXISTS Player ("
@@ -198,6 +201,12 @@ const char* Query::SELECT_ALL_ROOM =
 const char* Query::SELECT_ROOM_BY_ID =
     "SELECT * FROM Room WHERE id = ?;";
 
+const char* Query::SELECT_ALL_AVAILABLE_ROOM =
+    "SELECT * FROM Room WHERE status = 'WAITING';";
+
+const char* Query::CHECK_ROOM_STATUS =
+    "SELECT status FROM Room WHERE id = ?;";
+
 // RoomParticipant Queries
 const char* Query::CREATE_ROOM_PARTICIPANT_TABLE = 
     "CREATE TABLE IF NOT EXISTS RoomParticipant ("
@@ -221,6 +230,12 @@ const char* Query::SELECT_ALL_ROOM_PLAYERS_BY_ROOM_ID =
 
 const char* Query::SELECT_ALL_ROOM_SPECTATORS_BY_ROOM_ID =
     "SELECT * FROM RoomParticipant WHERE room_id = ? AND participant_type IN ('PLAYER_SPECTATOR', 'ADMIN_SPECTATOR');";
+
+const char* Query::DELETE_FROM_ROOM_PARTICIPANT =
+    "DELETE FROM RoomParticipant WHERE room_id = ? AND id = ?;";
+
+const char* Query::UPDATE_ROOM_PARTICIPANT_READY =
+    "UPDATE RoomParticipant SET is_ready = 1 WHERE room_id = ? AND participant_id = ?;";
 
 // GameSession Queries
 const char* Query::CREATE_GAME_SESSION_TABLE = 

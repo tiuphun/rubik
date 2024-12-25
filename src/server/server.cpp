@@ -1,41 +1,15 @@
-#include <iostream>
-#include <fstream>
-#include <string>
 #include <sstream>
-#include <unordered_map>
 #include <unistd.h>
-#include <netinet/in.h>
 #include <sys/socket.h>
-#include <sqlite3.h>
 #include "../database/header/database.h"
 #include "../database/queries/Query.h"
+#include "Server.h"
 
 using namespace std;
 
 #define PORT 8080
 
-class Server {
-public:
-    Server();
-    sqlite3 *db; //Database holder
-    const char* db_path = "/Volumes/DATA/repository/rubikServer/rubik/src/database/migration/Rubik.db"; //Absolute path
-    void start();
-    void handle_client(int client_socket);
-    
-private:
-
-    unordered_map<string, string> load_users();
-    void save_user(const string& username, const string& password);
-
-    void sign_up(int client_socket, const string& username, const string& password);
-    void sign_in(int client_socket, const string& username, const string& password);
-    
-    int server_socket;
-};
-
 Server::Server() {
-
-
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
         cerr << "Failed to create socket\n";
@@ -73,15 +47,15 @@ Server::Server() {
     cout << "Database initialization successful!\n"; 
 }
 
-void Server::sign_up(int client_socket, const string& username, const string& password) {
-    
+
+void Server::processMessage(const std::string& message, int client_socket) {
+    json parsed_message = MessageHandler::parseMessage(message);
+    json response = MessageHandler::handleMessage(parsed_message, db);
+    string response_str = response.dump();
+    send(client_socket, response_str.c_str(), response_str.length(), 0);
 }
 
-void Server::sign_in(int client_socket, const string& username, const string& password) {
-   
-}
-
-void Server::handle_client(int client_socket) {
+void Server::handleClient(int client_socket) {
     char buffer[1024] = {0};
     string welcome_msg = "Welcome to the Rubik Server! Type SIGNUP <username> <password> to register or SIGNIN <username> <password> to login.\n";
     send(client_socket, welcome_msg.c_str(), welcome_msg.length(), 0);

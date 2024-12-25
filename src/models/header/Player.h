@@ -5,6 +5,8 @@
 #include <string>
 #include <string.h>
 #include "Const.h"
+#include <ctime>
+#include <sqlite3.h>
 
 using namespace std;
 
@@ -21,27 +23,16 @@ public:
     PlayerStatus status;
     time_t ban_date;
     int ban_by;
-
-    
     int socket_fd;
-    //bool is_logged_in;
-
-    /*
-    Player(string uname, int sock)
-        : username(uname), socket_fd(sock), is_logged_in(true) {}
-
-    void logout() {
-        is_logged_in = false;
-    }
-    */
-    int createRoom(int created_by, int max_players, int max_spectators);
-    void joinRoom(Player player_id);
     
-    void readyRequestResponse(int player_id) {
-        // update is_ready trong bang Room Participant voi player_id tuong ung 
-    };
+    Player(sqlite3* db) : db(db) {}
 
-    
+private:
+    int createRoom(int max_players, int max_spectators);
+    void joinRoom(int room_id);
+    void isReady(int room_id);
+
+    sqlite3* db;
 };
 
 #endif

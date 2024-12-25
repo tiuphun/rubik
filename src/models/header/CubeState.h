@@ -10,7 +10,7 @@
 using namespace std;
 
 class CubeState{
-    public: 
+public: 
     int id;
     int player_game_session_id;
     bool validated;
