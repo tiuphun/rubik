@@ -4,12 +4,13 @@
 #include "../database/header/database.h"
 #include "../database/queries/Query.h"
 #include "Server.h"
+#include "../messages/MessageHandler.h"
 
 using namespace std;
 
 #define PORT 8080
 
-Server::Server() {
+Server::Server() : userService(nullptr) {
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
         cerr << "Failed to create socket\n";
@@ -32,32 +33,22 @@ Server::Server() {
     }
 
     cout << "Server listening on port " << PORT << "...\n";
-    /* Database init after socket init:
-    */
-    cout << "Loading Database..." << "\n";
-    cout << "Database path:" << db_path << "\n";
     
-    int rc = Database::db_init(db_path, &db);
+    int rc = sqlite3_open(db_path, &db);
     if(rc != SQLITE_OK){
-        cerr << "Database init failed\n";
+        cerr << "Database init failed: " << sqlite3_errmsg(db) << "\n";
         close(server_socket);
         exit(1);
     }
 
+    userService = UserService(db);
+
     cout << "Database initialization successful!\n"; 
-}
-
-
-void Server::processMessage(const std::string& message, int client_socket) {
-    json parsed_message = MessageHandler::parseMessage(message);
-    json response = MessageHandler::handleMessage(parsed_message, db);
-    string response_str = response.dump();
-    send(client_socket, response_str.c_str(), response_str.length(), 0);
 }
 
 void Server::handleClient(int client_socket) {
     char buffer[1024] = {0};
-    string welcome_msg = "Welcome to the Rubik Server! Type SIGNUP <username> <password> to register or SIGNIN <username> <password> to login.\n";
+    string welcome_msg = "Welcome to the Rubik Server! Send your JSON messages.\n";
     send(client_socket, welcome_msg.c_str(), welcome_msg.length(), 0);
 
     while (true) {
@@ -69,25 +60,15 @@ void Server::handleClient(int client_socket) {
         }
 
         string message(buffer, bytes_read);
-        message.erase(message.find_last_not_of(" \n\r\t") + 1); // Trim whitespace
-
-        cout << "Received: " << message << endl;
-
-        if (message.substr(0, 7) == "BAN_PLAYER_REQUEST") {
-            istringstream ss(message.substr(7));
-            string username, password;
-            ss >> username >> password;
-            sign_up(client_socket, username, password);
-        } else if (message.substr(0, 6) == "SIGNIN ") {
-            istringstream ss(message.substr(6));
-            string username, password;
-            ss >> username >> password;
-            sign_in(client_socket, username, password);
-        } else {
-            string unknown = "Unknown command. Try SIGNUP <username> <password> or SIGNIN <username> <password>.\n";
-            send(client_socket, unknown.c_str(), unknown.length(), 0);
-        }
+        processMessage(message, client_socket);
     }
+}
+
+void Server::processMessage(const std::string& message, int client_socket) {
+    json parsed_message = MessageHandler::parseMessage(message);
+    json response = MessageHandler::handleMessage(parsed_message, db);
+    string response_str = response.dump();
+    send(client_socket, response_str.c_str(), response_str.length(), 0);
 }
 
 void Server::start() {
@@ -102,6 +83,6 @@ void Server::start() {
         }
 
         cout << "New client connected\n";
-        handle_client(client_socket);
+        handleClient(client_socket);
     }
 }

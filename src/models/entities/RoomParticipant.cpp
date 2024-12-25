@@ -23,7 +23,7 @@ void RoomParticipant::leaveRoom() {
     if (rc != SQLITE_DONE) {
         fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
     } else {
-        printf("Participant %d left the room successfully.\n", participant_id);
+        printf("Participant %d left the room successfully.\n", id);
     }
 
     sqlite3_finalize(stmt);

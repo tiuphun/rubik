@@ -3,7 +3,7 @@
 
 #include <string>
 #include <sqlite3.h>
-#include <nlohmann/json.hpp>
+#include "../include/nlohmann/json.hpp"
 
 using json = nlohmann::json;
 using namespace std;
@@ -12,8 +12,8 @@ class UserService {
 public:
     UserService(sqlite3* db) : db(db) {}
 
-    json signUp(const string& username, const string& password);
-    json signIn(const string& username, const string& password);
+    void signUp(const string& username, const string& password);
+    void signIn(const string& username, const string& password);
 
 private:
     sqlite3* db;

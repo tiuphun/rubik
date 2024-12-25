@@ -179,6 +179,9 @@ const char* Query::INSERT_PLAYER =
 const char* Query::SELECT_ALL_PLAYER =
     "SELECT * FROM Player;";
 
+const char* Query::SELECT_PLAYER_BY_USERNAME =
+    "SELECT * FROM Player WHERE username = ?;";
+
 // Room Queries
 const char* Query::CREATE_ROOM_TABLE = 
     "CREATE TABLE IF NOT EXISTS Room ("

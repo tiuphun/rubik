@@ -16,6 +16,7 @@ public:
     static const char* CREATE_PLAYER_TABLE;
     static const char* INSERT_PLAYER;
     static const char* SELECT_ALL_PLAYER;
+    static const char* SELECT_PLAYER_BY_USERNAME;
 
     // Room Queries
     static const char* CREATE_ROOM_TABLE;
