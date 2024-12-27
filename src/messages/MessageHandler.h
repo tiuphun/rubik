@@ -12,6 +12,11 @@ public:
     static json parseMessage(const std::string& message);
     static json handleMessage(const json& parsed_message, sqlite3* db);
     static json craftResponse(const std::string& status, const json& data);
+private:
+    static json handleSignUp(const json& parsed_message, sqlite3* db);
+    static json handleSignIn(const json& parsed_message, sqlite3* db);
+    static json handleCreateRoom(const json& parsed_message, sqlite3* db);
+    static json handleJoinRoom(const json& parsed_message, sqlite3* db);
 };
 
 #endif

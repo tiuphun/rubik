@@ -10,8 +10,9 @@
                 "${workspaceFolder}/src/server",
                 "${workspaceFolder}/src/states",
                 "${workspaceFolder}/src/models/header",
-                "${workspaceFolder}/src/database/header"
-
+                "${workspaceFolder}/src/database/header",
+                "${workspaceFolder}/src/messages",
+                "${workspaceFolder}/src/services"
             ],
             "defines": [],
             "macFrameworkPath": [

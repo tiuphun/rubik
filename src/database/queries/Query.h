@@ -41,6 +41,7 @@ public:
 
     // PlayerGameSession Queries
     static const char* CREATE_PLAYER_GAME_SESSION_TABLE;
+    static const char* INSERT_PLAYER_GAME_SESSION;
 
     // CubeState Queries
     static const char* CREATE_CUBE_STATE_TABLE;

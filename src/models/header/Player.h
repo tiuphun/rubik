@@ -27,10 +27,8 @@ public:
     
     Player(sqlite3* db) : db(db) {}
 
-private:
     int createRoom(int max_players, int max_spectators);
-    void joinRoom(int room_id);
-    void isReady(int room_id);
+    void joinRoom(int room_id, const char* participant_type);
 
     sqlite3* db;
 };

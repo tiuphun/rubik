@@ -17,7 +17,7 @@ void RoomParticipant::leaveRoom() {
     }
 
     sqlite3_bind_int(stmt, 1, room_id);
-    sqlite3_bind_int(stmt, 2, id);
+    sqlite3_bind_int(stmt, 2, this->id);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
@@ -28,3 +28,24 @@ void RoomParticipant::leaveRoom() {
 
     sqlite3_finalize(stmt);
 }
+
+void RoomParticipant::isReady(int room_id) {
+    const char* sql = Query::UPDATE_ROOM_PARTICIPANT_READY;
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
+        return;
+    }
+
+    sqlite3_bind_int(stmt, 1, room_id);
+    sqlite3_bind_int(stmt, 2, this->id);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+    } else {
+        printf("Room Participant with id: %d is ready.\n", this->id);
+    }
+    sqlite3_finalize(stmt);
+};

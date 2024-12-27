@@ -19,13 +19,13 @@ public:
 
     Admin(sqlite3* db) : db(db) {}
 
-private:
+
     void banPlayer(int player_id);
     void viewPlayerList();
     void viewRoomList();
     void spectate(int game_session_id, int room_id);
     void leaveGame(int room_id);
-
+private:
     sqlite3* db;
 };
 

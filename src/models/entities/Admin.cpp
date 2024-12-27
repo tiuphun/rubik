@@ -4,6 +4,7 @@
 #include <ctime>
 #include "Admin.h"
 #include "../../database/queries/Query.h"
+#include "Const.h"
 
 void Admin::banPlayer(int player_id) {
     const char* sql = Query::BAN_PLAYER;
@@ -14,14 +15,14 @@ void Admin::banPlayer(int player_id) {
         return;
     }
 
-    sqlite3_bind_int(stmt, 1, id); // ban_by = admin_id
+    sqlite3_bind_int(stmt, 1, this->id); // ban_by = admin_id
     sqlite3_bind_int(stmt, 2, player_id);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
         fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
     } else {
-        printf("Player %d banned successfully.\n", player_id);
+        printf("Player with id: %d banned successfully.\n", player_id);
     }
 
     sqlite3_finalize(stmt);
@@ -82,7 +83,7 @@ void Admin::spectate(int game_session_id, int room_id){
 
     sqlite3_bind_int(stmt, 1, room_id);
     sqlite3_bind_text(stmt, 2, "ADMIN_SPECTATOR", -1, SQLITE_STATIC);
-    sqlite3_bind_int(stmt, 3, id); // Assuming 'id' is the admin's ID
+    sqlite3_bind_int(stmt, 3, this->id); // participant_id = admin_id
     sqlite3_bind_int(stmt, 4, 1); // is_ready = true
 
     rc = sqlite3_step(stmt);

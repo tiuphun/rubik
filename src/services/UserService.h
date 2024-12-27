@@ -12,8 +12,8 @@ class UserService {
 public:
     UserService(sqlite3* db) : db(db) {}
 
-    void signUp(const string& username, const string& password);
-    void signIn(const string& username, const string& password);
+    json signUp(const string& username, const string& password);
+    json signIn(const string& username, const string& password);
 
 private:
     sqlite3* db;

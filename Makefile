@@ -29,6 +29,7 @@ INCLUDES = -I$(SRC_DIR)/constants \
            -I$(SRC_DIR)/states \
            -I$(SRC_DIR)/messages \
            -I$(SRC_DIR)/services \
+              -Iinclude
 
 # Target executable
 TARGET = rubik-server

@@ -238,7 +238,7 @@ const char* Query::DELETE_FROM_ROOM_PARTICIPANT =
     "DELETE FROM RoomParticipant WHERE room_id = ? AND id = ?;";
 
 const char* Query::UPDATE_ROOM_PARTICIPANT_READY =
-    "UPDATE RoomParticipant SET is_ready = 1 WHERE room_id = ? AND participant_id = ?;";
+    "UPDATE RoomParticipant SET is_ready = 1 WHERE room_id = ? AND participant_id = ? AND participant_type = 'PLAYER';";
 
 // GameSession Queries
 const char* Query::CREATE_GAME_SESSION_TABLE = 
@@ -278,6 +278,10 @@ const char* Query::CREATE_PLAYER_GAME_SESSION_TABLE =
     "FOREIGN KEY (player_id) REFERENCES Player(id),"
     "FOREIGN KEY (cube_state_id) REFERENCES CubeState(id)"
     ");";
+
+const char* Query::INSERT_PLAYER_GAME_SESSION =
+    "INSERT INTO PlayerGameSession(game_session_id, player_id,cube_state_id) "
+    "VALUES(?,?,?);";
 
 // CubeState Queries
 const char* Query::CREATE_CUBE_STATE_TABLE = 
