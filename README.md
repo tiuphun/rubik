@@ -51,32 +51,23 @@ The server setup and processing are handled in `server.cpp` and `main.cpp`. The 
 
 ```mermaid
 sequenceDiagram
+    participant MessageHandler (Client)
     participant Client
     participant Server
-    participant MessageHandler
+    participant MessageHandler (Server)
 
-    Client->>Server: Craft JSON message
-    Server->>MessageHandler: Send (via socket)
-    MessageHandler->>MessageHandler: Receive message
-    MessageHandler->>MessageHandler: Parse message
-    MessageHandler->>MessageHandler: Handle message (based on type)
-    MessageHandler->>Server: Process at the server
-    Server->>MessageHandler: Get response
-    MessageHandler->>MessageHandler: Craft response
-    MessageHandler->>Server: Send back (via socket)
-    Server->>Client: Receive response
-
-    Server->>Client: Craft JSON message
-    Client->>MessageHandler: Send (via socket)
-    MessageHandler->>MessageHandler: Receive message
-    MessageHandler->>MessageHandler: Parse message
-    MessageHandler->>MessageHandler: Handle message (based on type)
-    MessageHandler->>Client: Process at the client
-    Client->>MessageHandler: Get response
-    MessageHandler->>MessageHandler: Craft response
-    MessageHandler->>Client: Send back (via socket)
-    Client->>Server: Receive response
+    MessageHandler (Client) ->> Client: Craft JSON message
+    Client->>Server: Send (via socket)
+    Server->>MessageHandler (Server): Receive message
+    MessageHandler (Server)->>MessageHandler (Server): Parse message
+    MessageHandler (Server)->>Server: Handle message (based on type)
+    Server->>Server: Process at the server
+    Server->>MessageHandler (Server): Return response
+    MessageHandler (Server)->>Server: Craft JSON message
+    Server->>Client: Send back (via socket)
+    Client->>MessageHandler (Client): Receive message
 ```
+Message flow from Client to Server.
 
 ## Message Handling
 
