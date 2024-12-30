@@ -10,6 +10,7 @@
 #include "CubeState.h"
 #include "GameMove.h"
 #include <vector>
+#include "../../include/nlohmann/json.hpp"
 
 using namespace std;
 

@@ -27,8 +27,8 @@ public:
     vector <PlayerGameSession> player_game_sessions;
     GameSession(sqlite3* db) : db(db) {}
 
-    void createPlayerGameSessions(const vector<int>& playerIds, int cube_state_id);
-    void endGameSession(int player_id);
+    json createPlayerGameSessions(const vector<int>& playerIds, int cube_state_id);
+    json endGameSession(int player_id);
 
 private:
     sqlite3* db;

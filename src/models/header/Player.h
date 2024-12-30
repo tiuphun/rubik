@@ -27,8 +27,9 @@ public:
     
     Player(sqlite3* db) : db(db) {}
 
-    int createRoom(int max_players, int max_spectators);
-    void joinRoom(int room_id, const char* participant_type);
+    json createRoom(int max_players, int max_spectators);
+    json joinRoom(int room_id, const char* participant_type);
+    json viewRoomList();
 
     sqlite3* db;
 };

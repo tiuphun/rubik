@@ -6,7 +6,7 @@
 #include "../../database/queries/Query.h"
 #include "Const.h"
 
-void Admin::banPlayer(int player_id) {
+json Admin::banPlayer(int player_id) {
     const char* sql = Query::BAN_PLAYER;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
@@ -28,7 +28,7 @@ void Admin::banPlayer(int player_id) {
     sqlite3_finalize(stmt);
 };
 
-void Admin::viewPlayerList() {
+json Admin::viewPlayerList() {
     const char* sql = Query::SELECT_ALL_PLAYER;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
@@ -50,7 +50,7 @@ void Admin::viewPlayerList() {
     sqlite3_finalize(stmt);
 };
 
-void Admin::viewRoomList() {
+json Admin::viewRoomList() {
     const char* sql = Query::SELECT_ALL_AVAILABLE_ROOM;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
@@ -71,7 +71,7 @@ void Admin::viewRoomList() {
     sqlite3_finalize(stmt);
 }
 
-void Admin::spectate(int game_session_id, int room_id){
+json Admin::spectate(int game_session_id, int room_id){
     // Insert admin as a spectator into RoomParticipant
     const char* insert_sql = Query::INSERT_ROOM_PARTICIPANT;
     sqlite3_stmt* stmt;
@@ -137,7 +137,7 @@ void Admin::spectate(int game_session_id, int room_id){
     sqlite3_finalize(stmt);
 }
 
-void Admin::leaveGame(int room_id) {
+json Admin::leaveGame(int room_id) {
     const char* sql = Query::DELETE_FROM_ROOM_PARTICIPANT;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);

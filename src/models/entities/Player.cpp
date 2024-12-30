@@ -7,6 +7,26 @@
 #include "Const.h"
 #include "../../messages/MessageHandler.h"
 
+void Player::viewRoomList() {
+    const char* sql = Query::SELECT_ALL_AVAILABLE_ROOM;
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
+        return;
+    }
+
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+        int room_id = sqlite3_column_int(stmt, 0);
+        printf("Room ID: %d\n", room_id);
+    }
+
+    if (rc != SQLITE_DONE) {
+        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+    }
+
+    sqlite3_finalize(stmt);
+}
 
 json Player::createRoom(int max_players, int max_spectators) {
     const char* sql = Query::INSERT_ROOM;

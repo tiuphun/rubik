@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void Room::startGameSession(int game_session_id, int player_id, string initial_cube_state) {
+json Room::startGameSession(int game_session_id, int player_id, string initial_cube_state) {
     // bat dau game session
     // tao game session
     // tao cube
@@ -45,7 +45,7 @@ void Room::startGameSession(int game_session_id, int player_id, string initial_c
 //     // bat dau startGameSession(game_session_id, player_id, initCubeState())
 // };
 
-bool Room::canStartGame(){
+json Room::canStartGame(){
     for(const auto& participant : participants){
         if(participant.participant_type == "PLAYER" && !participant.is_ready){
             return false;

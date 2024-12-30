@@ -7,6 +7,8 @@
 #include <sqlite3.h>
 #include "Const.h"
 #include <string>
+#include "../../include/nlohmann/json.hpp"
+
 using namespace std;
 
 class RoomParticipant {
@@ -21,8 +23,8 @@ public:
     RoomParticipant(sqlite3* db) : db(db) {}
 
 
-    void leaveRoom();
-    void isReady(int room_id);
+    json leaveRoom();
+    json isReady(int room_id);
 private:
     sqlite3* db;
 };

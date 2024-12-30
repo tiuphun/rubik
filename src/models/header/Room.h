@@ -9,6 +9,7 @@
 #include "Const.h"
 #include "RoomParticipant.h"
 #include "GameSession.h"
+#include "../../include/nlohmann/json.hpp"
 
 using namespace std;
 
@@ -25,9 +26,9 @@ public:
     
     Room(sqlite3* db) : db(db) {}
 
-    void startGameSession(int game_session_id, int player_id, string initial_cube_state);
-    bool canStartGame();
-    string initCubeState();
+    json startGameSession(int game_session_id, int player_id, string initial_cube_state);
+    json canStartGame();
+    json initCubeState();
     
 private:
     sqlite3* db;
