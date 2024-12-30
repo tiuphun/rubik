@@ -262,6 +262,9 @@ const char* Query::INSERT_GAME_SESSION =
 const char* Query::SELECT_ALL_GAME_SESSION =
     "SELECT * FROM GameSession;";
 
+const char* Query::END_GAME_SESSION =
+    "UPDATE GameSession SET status = 'COMPLETED', end_time = datetime('now') WHERE id = ?;";
+
 // PlayerGameSession Queries
 const char* Query::CREATE_PLAYER_GAME_SESSION_TABLE = 
     "CREATE TABLE IF NOT EXISTS PlayerGameSession ("

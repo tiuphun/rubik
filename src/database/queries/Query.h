@@ -38,6 +38,7 @@ public:
     static const char* CREATE_GAME_SESSION_TABLE;
     static const char* INSERT_GAME_SESSION;
     static const char* SELECT_ALL_GAME_SESSION;
+    static const char* END_GAME_SESSION;
 
     // PlayerGameSession Queries
     static const char* CREATE_PLAYER_GAME_SESSION_TABLE;
