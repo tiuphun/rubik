@@ -46,7 +46,37 @@ make clean
 
 ## Server Setup and Processing
 
-The server setup and processing are handled in `server.cpp` and `main.cpp`. The server listens for client connections, reads messages, processes them using MessageHandler, and sends responses back to the clients.
+The server setup and processing are handled in `server.cpp` and `main.cpp`. The server listens for client connections, reads messages, processes them using `MessageHandler`, and sends responses back to the clients.
+
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    participant MessageHandler
+
+    Client->>Server: Craft JSON message
+    Server->>MessageHandler: Send (via socket)
+    MessageHandler->>MessageHandler: Receive message
+    MessageHandler->>MessageHandler: Parse message
+    MessageHandler->>MessageHandler: Handle message (based on type)
+    MessageHandler->>Server: Process at the server
+    Server->>MessageHandler: Get response
+    MessageHandler->>MessageHandler: Craft response
+    MessageHandler->>Server: Send back (via socket)
+    Server->>Client: Receive response
+
+    Server->>Client: Craft JSON message
+    Client->>MessageHandler: Send (via socket)
+    MessageHandler->>MessageHandler: Receive message
+    MessageHandler->>MessageHandler: Parse message
+    MessageHandler->>MessageHandler: Handle message (based on type)
+    MessageHandler->>Client: Process at the client
+    Client->>MessageHandler: Get response
+    MessageHandler->>MessageHandler: Craft response
+    MessageHandler->>Client: Send back (via socket)
+    Client->>Server: Receive response
+```
 
 ## Message Handling
 
