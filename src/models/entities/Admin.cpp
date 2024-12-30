@@ -5,14 +5,14 @@
 #include "Admin.h"
 #include "../../database/queries/Query.h"
 #include "Const.h"
+#include "../../messages/MessageHandler.h"
 
 json Admin::banPlayer(int player_id) {
     const char* sql = Query::BAN_PLAYER;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
-        return;
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
     sqlite3_bind_int(stmt, 1, this->id); // ban_by = admin_id
@@ -20,65 +20,69 @@ json Admin::banPlayer(int player_id) {
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
-    } else {
-        printf("Player with id: %d banned successfully.\n", player_id);
+        sqlite3_finalize(stmt);
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
     sqlite3_finalize(stmt);
-};
+    return MessageHandler::craftResponse("success", {{"message", "Player banned successfully"}});
+}
 
 json Admin::viewPlayerList() {
     const char* sql = Query::SELECT_ALL_PLAYER;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
-        return;
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
+    json players = json::array();
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
         int id = sqlite3_column_int(stmt, 0);
         const unsigned char* username = sqlite3_column_text(stmt, 1);
-        printf("Player ID: %d, Username: %s\n", id, username);
+        players.push_back({{"id", id}, {"username", std::string(reinterpret_cast<const char*>(username))}});
     }
 
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
     sqlite3_finalize(stmt);
-};
+    return MessageHandler::craftResponse("success", {{"players", players}});
+}
 
 json Admin::viewRoomList() {
     const char* sql = Query::SELECT_ALL_AVAILABLE_ROOM;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
-        return;
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
+    json rooms = json::array();
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
         int room_id = sqlite3_column_int(stmt, 0);
-        printf("Room ID: %d\n", room_id);
+        rooms.push_back({{"room_id", room_id}});
     }
 
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
     sqlite3_finalize(stmt);
+    return MessageHandler::craftResponse("success", {{"rooms", rooms}});
 }
 
-json Admin::spectate(int game_session_id, int room_id){
+
+json Admin::spectate(int game_session_id, int room_id) {
     // Insert admin as a spectator into RoomParticipant
     const char* insert_sql = Query::INSERT_ROOM_PARTICIPANT;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, insert_sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
-        return;
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
     sqlite3_bind_int(stmt, 1, room_id);
@@ -88,9 +92,8 @@ json Admin::spectate(int game_session_id, int room_id){
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
-    } else {
-        printf("Admin %d joined room %d as a spectator.\n", id, room_id);
+        sqlite3_finalize(stmt);
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
     sqlite3_finalize(stmt);
@@ -99,8 +102,7 @@ json Admin::spectate(int game_session_id, int room_id){
     const char* check_status_sql = Query::CHECK_ROOM_STATUS;
     rc = sqlite3_prepare_v2(db, check_status_sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
-        return;
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
     sqlite3_bind_int(stmt, 1, room_id);
@@ -135,6 +137,7 @@ json Admin::spectate(int game_session_id, int room_id){
     }
 
     sqlite3_finalize(stmt);
+    return MessageHandler::craftResponse("success", {{"message", "Admin spectating the game"}});
 }
 
 json Admin::leaveGame(int room_id) {
@@ -142,8 +145,7 @@ json Admin::leaveGame(int room_id) {
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
-        return;
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
     sqlite3_bind_int(stmt, 1, room_id); // Assuming 'id' is the admin's ID
@@ -151,11 +153,10 @@ json Admin::leaveGame(int room_id) {
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
-    } else {
-        printf("Admin %d left the game successfully.\n", id);
+        sqlite3_finalize(stmt);
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
     sqlite3_finalize(stmt);
-    sqlite3_close(db);
+    return MessageHandler::craftResponse("success", {{"message", "Admin left the game successfully"}});
 }

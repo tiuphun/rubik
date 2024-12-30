@@ -8,7 +8,6 @@
 #include <ctime>
 #include <sqlite3.h>
 #include "CubeState.h"
-#include "GameMove.h"
 #include <vector>
 #include "../../include/nlohmann/json.hpp"
 
@@ -16,7 +15,6 @@ using namespace std;
 
 class PlayerGameSession {
 public:
-    vector<GameMove> game_moves;
     vector<CubeState> cube_states;
 
     int id;
@@ -31,9 +29,7 @@ public:
 
     PlayerGameSession(sqlite3* db) : db(db) {}
 
-    void validateCube(string cube);
-    void updateMoveFromClient(string message);
-    void updateCubeFromClient(string message);
+    json updateCubeFromClient(string message);
   
 private:
     sqlite3* db;

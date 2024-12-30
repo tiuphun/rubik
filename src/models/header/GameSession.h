@@ -9,6 +9,7 @@
 #include "PlayerGameSession.h"
 #include <vector>
 #include <sqlite3.h>
+#include "../../include/nlohmann/json.hpp"
 
 using namespace std;
 

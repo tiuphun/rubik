@@ -6,6 +6,7 @@
 #include <string.h>
 #include <ctime>
 #include <sqlite3.h>
+#include "../../include/nlohmann/json.hpp"
 
 using namespace std;
 

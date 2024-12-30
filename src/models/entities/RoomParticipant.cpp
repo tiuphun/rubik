@@ -4,16 +4,15 @@
 #include <ctime>
 #include "RoomParticipant.h"
 #include "../../database/queries/Query.h"
+#include "../../messages/MessageHandler.h"
 
-
-void RoomParticipant::leaveRoom() {
+json RoomParticipant::leaveRoom() {
     const char* sql = Query::DELETE_FROM_ROOM_PARTICIPANT;
     sqlite3_stmt* stmt;
 
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
-        return;
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
     sqlite3_bind_int(stmt, 1, room_id);
@@ -21,21 +20,20 @@ void RoomParticipant::leaveRoom() {
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
-    } else {
-        printf("Participant %d left the room successfully.\n", id);
+        sqlite3_finalize(stmt);
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
     sqlite3_finalize(stmt);
+    return MessageHandler::craftResponse("success", {{"message", "Participant left the room successfully"}});
 }
 
-void RoomParticipant::isReady(int room_id) {
+json RoomParticipant::isReady(int room_id) {
     const char* sql = Query::UPDATE_ROOM_PARTICIPANT_READY;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
-        return;
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
 
     sqlite3_bind_int(stmt, 1, room_id);
@@ -43,9 +41,10 @@ void RoomParticipant::isReady(int room_id) {
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
-    } else {
-        printf("Room Participant with id: %d is ready.\n", this->id);
+        sqlite3_finalize(stmt);
+        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
+
     sqlite3_finalize(stmt);
-};
+    return MessageHandler::craftResponse("success", {{"message", "Room Participant is ready"}});
+}
