@@ -66,8 +66,11 @@ sequenceDiagram
     MessageHandler (Server)->>Server: Craft JSON message
     Server->>Client: Send back (via socket)
     Client->>MessageHandler (Client): Receive message
+    MessageHandler (Client)->>MessageHandler (Client): Parse message
+    MessageHandler (Client)->>Client: Handle message (based on type)
+    Client->>Client: Process at the client
+    Client->>MessageHandler (Client): Return response
 ```
-Message flow from Client to Server.
 
 ## Message Handling
 
