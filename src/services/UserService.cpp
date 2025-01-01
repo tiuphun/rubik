@@ -16,9 +16,10 @@ json UserService::signUp(const string& username, const string& password) {
     if (rc != SQLITE_OK) {
         return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
-
-    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, password_hash.c_str(), -1, SQLITE_STATIC);
+    this->playerLatestId++;
+    sqlite3_bind_int(stmt, 1, this->playerLatestId);
+    sqlite3_bind_text(stmt, 2, username.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, password_hash.c_str(), -1, SQLITE_STATIC);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
@@ -37,7 +38,7 @@ json UserService::signIn(const string& username, const string& password) {
     string password_hash(reinterpret_cast<char*>(hash), SHA256_DIGEST_LENGTH);
 
     // Prepare SQL statement
-    const char* sql = Query::SELECT_PLAYER_BY_USERNAME;
+    const char* sql = Query::FIND_AUTH_USER;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
@@ -45,6 +46,7 @@ json UserService::signIn(const string& username, const string& password) {
     }
 
     sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, password_hash.c_str(), -1, SQLITE_STATIC);
 
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {

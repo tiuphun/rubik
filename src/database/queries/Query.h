@@ -6,17 +6,22 @@ public:
     // PRAGMA to enable foreign keys
     static const char* ENABLE_FOREIGN_KEYS;
 
+    // Login
+    static const char* FIND_AUTH_USER;
+
     // Admin Queries
     static const char* CREATE_ADMIN_TABLE;
     static const char* INSERT_ADMIN;
     static const char* SELECT_ALL_ADMIN;
     static const char* BAN_PLAYER;
+    static const char* SELECT_ADMIN_BY_ID;
 
     // Player Queries
     static const char* CREATE_PLAYER_TABLE;
     static const char* INSERT_PLAYER;
     static const char* SELECT_ALL_PLAYER;
     static const char* SELECT_PLAYER_BY_USERNAME;
+    static const char* SELECT_PLAYER_BY_ID;
 
     // Room Queries
     static const char* CREATE_ROOM_TABLE;

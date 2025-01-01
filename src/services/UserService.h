@@ -17,6 +17,11 @@ public:
 
 private:
     sqlite3* db;
+    //Define counter to track player & admin id. 
+    //Modify it based on the draft data. 
+    //For example, if 3 users are created already, then change this number.
+    int playerLatestId = 1;
+    int adminLatestId = 10000;
 };
 
 #endif

@@ -10,7 +10,7 @@ using namespace std;
 
 #define PORT 8080
 
-Server::Server() : userService(nullptr) {
+Server::Server() : userService(nullptr), playerRepo(db), adminRepo(db) {
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
         cerr << "Failed to create socket\n";
@@ -71,6 +71,11 @@ void Server::processMessage(const std::string& message, int client_socket) {
     send(client_socket, response_str.c_str(), response_str.length(), 0);
 }
 
+void Server::initializeUsers(){
+    players = playerRepo.getAllPlayers();
+    admins  = adminRepo.getAllAdmins();
+}
+
 void Server::start() {
     while (true) {
         struct sockaddr_in client_address;
@@ -85,4 +90,28 @@ void Server::start() {
         cout << "New client connected\n";
         handleClient(client_socket);
     }
+}
+
+void Server::addPlayer(const Player& player) {
+    players.push_back(player);
+}
+
+void Server::addAdmin(const Admin& admin) {
+    admins.push_back(admin);
+}
+
+void Server::addRoom(const Room& room) {
+    rooms.push_back(room);
+}
+
+vector<Player>& Server::getPlayers() {
+    return players;
+}
+
+vector<Admin>& Server::getAdmins() {
+    return admins;
+}
+
+vector<Room>& Server::getRooms() {
+    return rooms;
 }

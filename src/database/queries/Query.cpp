@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS Room (
     max_players INTEGER NOT NULL CHECK(max_players > 0),
     max_spectators INTEGER NOT NULL CHECK(max_spectators >= 0),
     status TEXT DEFAULT 'WAITING' CHECK (status IN ('WAITING', 'READY', 'IN_PROGRESS', 'ENDED')),
-    FOREIGN KEY (created_by) REFERENCES Player(id) ON DELETE CASCADE
+    FOREIGN KEY (created_by) REFERENCES Player(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS RoomParticipant (
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS RoomParticipant (
     is_ready INTEGER DEFAULT 0 CHECK(is_ready IN (0,1)),
     joined_at DATETIME DEFAULT (datetime('now')),
     UNIQUE(room_id, participant_id, participant_type),
-    FOREIGN KEY (room_id) REFERENCES Room(id) ON DELETE CASCADE
+    FOREIGN KEY (room_id) REFERENCES Room(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS GameSession (
@@ -57,10 +57,11 @@ CREATE TABLE IF NOT EXISTS GameSession (
     end_time DATETIME,
     total_moves INTEGER DEFAULT 0,
     status TEXT DEFAULT 'IN_SESSION' CHECK (status IN ('IN_SESSION', 'COMPLETED')),
-    initial_cube_state TEXT NOT NULL,
+    initial_cube_state INTEGER NOT NULL,
     winner_id INTEGER,
-    FOREIGN KEY (room_id) REFERENCES Room(id) ON DELETE CASCADE,
-    FOREIGN KEY (winner_id) REFERENCES Player(id)
+    FOREIGN KEY (room_id) REFERENCES Room(id) ON DELETE RESTRICT,
+    FOREIGN KEY (winner_id) REFERENCES Player(id),
+  	FOREIGN KEY (initial_cube_state) REFERENCES CubeState(id)
 );
 
 CREATE TABLE IF NOT EXISTS PlayerGameSession (
@@ -69,11 +70,10 @@ CREATE TABLE IF NOT EXISTS PlayerGameSession (
     player_id INTEGER NOT NULL,
     time_taken REAL,
     moves_count INTEGER DEFAULT 0,
-    move_sequence TEXT,
     status TEXT DEFAULT 'PLAYING' CHECK (status IN ('PLAYING', 'ABANDONED', 'FINISHED')),
     completion_time DATETIME,
     cube_state_id INTEGER,
-    FOREIGN KEY (game_session_id) REFERENCES GameSession(id) ON DELETE CASCADE,
+    FOREIGN KEY (game_session_id) REFERENCES GameSession(id) ON DELETE RESTRICT,
     FOREIGN KEY (player_id) REFERENCES Player(id),
     FOREIGN KEY (cube_state_id) REFERENCES CubeState(id)
 );
@@ -84,15 +84,7 @@ CREATE TABLE IF NOT EXISTS CubeState (
     status TEXT DEFAULT 'SUCCESS' CHECK (status IN('SUCCESS','FAIL')),
     cube TEXT NOT NULL,
     validation_timestamp DATETIME DEFAULT (datetime('now')),
-    FOREIGN KEY (player_game_session_id) REFERENCES PlayerGameSession(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS GameMove (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    player_game_session_id INTEGER NOT NULL,
-    move TEXT NOT NULL,
-    move_timestamp DATETIME DEFAULT (datetime('now')),
-    FOREIGN KEY (player_game_session_id) REFERENCES PlayerGameSession(id) ON DELETE CASCADE
+    FOREIGN KEY (player_game_session_id) REFERENCES PlayerGameSession(id) ON DELETE RESTRICT
 );
 
 CREATE VIEW IF NOT EXISTS RoomPlayers AS
@@ -123,13 +115,32 @@ SELECT
 FROM RoomParticipant
 GROUP BY room_id;
 
+CREATE VIEW IF NOT EXISTS AuthUsers AS
+SELECT 
+    id,
+    username,
+    password_hash,
+    'PLAYER' as user_type,
+    status as account_status
+FROM Player
+UNION ALL
+SELECT 
+    id,
+    username,
+    password_hash,
+    'ADMIN' as user_type,
+    'ACTIVE' as account_status  -- Admins are always considered active
+FROM Admin;
+
 CREATE INDEX IF NOT EXISTS idx_player_username ON Player(username);
 CREATE INDEX IF NOT EXISTS idx_admin_username ON Admin(username);
 CREATE INDEX IF NOT EXISTS idx_room_status ON Room(status);
 CREATE INDEX IF NOT EXISTS idx_room_participant_types ON RoomParticipant(room_id, participant_type);
 CREATE INDEX IF NOT EXISTS idx_game_session_status ON GameSession(status);
 CREATE INDEX IF NOT EXISTS idx_player_game_session_status ON PlayerGameSession(status);
-CREATE INDEX IF NOT EXISTS idx_game_moves_session ON GameMove(player_game_session_id, move_timestamp);
+CREATE INDEX IF NOT EXISTS idx_cube_state_validation ON CubeState(validation_timestamp);
+CREATE INDEX IF NOT EXISTS idx_game_session_times ON GameSession(start_time, end_time);
+CREATE INDEX IF NOT EXISTS idx_cube_state_id ON PlayerGameSession(cube_state_id);
 */
 
 // PRAGMA to enable foreign keys
@@ -144,13 +155,18 @@ const char* Query::CREATE_ADMIN_TABLE =
     "created_at DATETIME DEFAULT (datetime('now')),"
     "last_login DATETIME"
     ");";
+const char* Query::FIND_AUTH_USER = 
+    "SELECT id, username, user_type, account_status FROM AuthUsers WHERE username = ? AND password_hash = ? LIMIT 1;";
 
 const char* Query::INSERT_ADMIN = 
-    "INSERT INTO Admin(username,password_hash) "
-    "VALUES(?,?);";
+    "INSERT INTO Admin(id,username,password_hash) "
+    "VALUES(?,?,?);";
 
 const char* Query::SELECT_ALL_ADMIN =
     "SELECT * FROM Admin;";
+
+const char* Query::SELECT_ADMIN_BY_ID =
+    "SELECT * FROM admin WHERE id = ? LIMIT 1;";
 
 const char* Query::BAN_PLAYER =
     "UPDATE Player SET status = 'BANNED', ban_by = ? WHERE id = ?;";
@@ -173,14 +189,17 @@ const char* Query::CREATE_PLAYER_TABLE =
     ");";
 
 const char* Query::INSERT_PLAYER = 
-    "INSERT INTO Player(username,password_hash) "
-    "VALUES(?,?);";
+    "INSERT INTO Player(id,username,password_hash) "
+    "VALUES(?,?,?);";
 
 const char* Query::SELECT_ALL_PLAYER =
     "SELECT * FROM Player;";
 
 const char* Query::SELECT_PLAYER_BY_USERNAME =
     "SELECT * FROM Player WHERE username = ?;";
+
+const char* Query::SELECT_PLAYER_BY_ID =
+    "SELECT * FROM Player WHERE id = ?;";
 
 // Room Queries
 const char* Query::CREATE_ROOM_TABLE = 
@@ -249,7 +268,7 @@ const char* Query::CREATE_GAME_SESSION_TABLE =
     "end_time DATETIME,"
     "total_moves INTEGER DEFAULT 0,"
     "status TEXT DEFAULT 'IN_SESSION' CHECK (status IN ('IN_SESSION', 'COMPLETED')),"
-    "initial_cube_state TEXT NOT NULL,"
+    "initial_cube_state INTEGER NOT NULL,"
     "winner_id INTEGER,"
     "FOREIGN KEY (room_id) REFERENCES Room(id) ON DELETE CASCADE,"
     "FOREIGN KEY (winner_id) REFERENCES Player(id)"
@@ -299,20 +318,6 @@ const char* Query::CREATE_CUBE_STATE_TABLE =
 
 const char* Query::INSERT_CUBE_STATE =
     "INSERT INTO CubeState(player_game_session_id, status, cube) "
-    "VALUES(?,?,?);";
-
-// GameMove Queries
-const char* Query::CREATE_GAME_MOVE_TABLE =
-    "CREATE TABLE IF NOT EXISTS GameMove ("
-    "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-    "player_game_session_id INTEGER NOT NULL,"
-    "move TEXT NOT NULL,"
-    "move_timestamp DATETIME DEFAULT (datetime('now')),"
-    "FOREIGN KEY (player_game_session_id) REFERENCES PlayerGameSession(id) ON DELETE CASCADE"
-    ");";
-
-const char* Query::INSERT_GAME_MOVE =
-    "INSERT INTO GameMove(player_game_session_id, move, move_timestamp) "
     "VALUES(?,?,?);";
 
 // View and Index Definitions
