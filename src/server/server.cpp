@@ -10,6 +10,10 @@ using namespace std;
 
 #define PORT 8080
 
+int Server::room_id_counter = 1;
+int Server::game_session_id_counter = 1;
+int Server::player_game_session_id_counter = 1;
+
 Server::Server() : playerRepo(db), adminRepo(db) {
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
@@ -116,7 +120,7 @@ vector<Room>& Server::getRooms() {
 Room Server::getRoomById(int room_id){
     for (const Room& room: rooms)
     {
-        if (room.getId() == room_id)
+        if (room.id == room_id)
         {
             return room;
         }

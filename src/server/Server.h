@@ -41,6 +41,10 @@ public:
 
     sqlite3* getDb(); // Public getter for db
 
+    static int room_id_counter;
+    static int game_session_id_counter;
+    static int player_game_session_id_counter;
+
 private:
     int server_socket; 
     sqlite3 *db;
@@ -52,6 +56,7 @@ private:
     vector<Player> players;
     vector<Admin> admins;
     vector<Room> rooms;
+
 };
 
 #endif
