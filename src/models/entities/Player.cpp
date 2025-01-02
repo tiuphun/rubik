@@ -8,14 +8,27 @@
 #include "../../messages/MessageHandler.h"
 #include "../../include/nlohmann/json.hpp"
 #include "../../server/Server.h"
+#include <chrono>
+
+using namespace std;
+using namespace std::chrono;
 
 nlohmann::json Player::viewRoomList(Server& server) {
     vector<Room> rooms = server.getRooms();
-    return MessageHandler::craftResponse("success", {{"rooms", rooms}}); //Change this to return JSON with room list.
+    nlohmann::json rooms_json = nlohmann::json::array();
+    for (const auto& room : rooms) {
+        rooms_json.push_back(room.toJson()); // Assuming Room has a toJson() method
+    }
+    return MessageHandler::craftResponse("success", {{"rooms", rooms_json}});
 }
 
 nlohmann::json Player::createRoom(int max_players, int max_spectators, Server& server) {
-    Room room(0, this->id, time(nullptr), max_players, max_spectators, RoomStatus::WAITING);
+    // Get the current time using chrono
+    auto now = system_clock::now();
+    auto now_time_t = system_clock::to_time_t(now);
+
+    // Create a new Room object
+    Room room(Server::room_id_counter++, this->id, now_time_t, max_players, max_spectators, RoomStatus::WAITING, server, vector<GameSession>(), 1, 0);
     server.addRoom(room);
     return MessageHandler::craftResponse("success", {{"message", "Room created successfully"}, {"room_id", room.id}});
 }

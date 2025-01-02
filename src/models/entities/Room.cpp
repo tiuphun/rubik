@@ -6,42 +6,85 @@
 #include "Const.h"
 #include "../../database/queries/Query.h"
 #include "../../messages/MessageHandler.h"
+#include <chrono>
+#include "../../services/GenCube.h"
+#include <string.h>
 
 using namespace std;
+using namespace std::chrono;
 
-nlohmann::json Room::startGameSession(int game_session_id, int player_id, string initial_cube_state) {
-    string first_cube_state = initCubeState();
-    const char* sql = Query::INSERT_GAME_SESSION;
-    sqlite3_stmt* stmt;
-    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK) {
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-    }
+nlohmann::json Room::startGameSession(int player_id, const string initial_cube_state, int room_id) {
+    // Check if game session is already started
 
-    sqlite3_bind_int(stmt, 1, game_session_id);
-    sqlite3_bind_int(stmt, 2, player_id);
-    sqlite3_bind_text(stmt, 3, first_cube_state.c_str(), -1, SQLITE_STATIC);
-
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE) {
-        sqlite3_finalize(stmt);
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-    }
-
-    sqlite3_finalize(stmt);
-    return MessageHandler::craftResponse("success", {{"message", "Game session started successfully"}, {"game_session_id", game_session_id}});
+    int player_game_session_id = server.player_game_session_id_counter;
+    auto now = system_clock::now();
+    auto now_time_t = system_clock::to_time_t(now);
+    GameSession new_game_session = GameSession(Server::game_session_id_counter, room_id, player_id, now_time_t ,0, 0, GameSessionStatus::IN_SESSION, initial_cube_state);
+    nlohmann::json game_session_json = {
+        {"id", new_game_session.id},
+        {"room_id", new_game_session.room_id},
+        {"player_id", new_game_session.player_id},
+        {"start_time", new_game_session.start_time},
+        {"end_time", new_game_session.end_time},
+        {"status", new_game_session.status},
+        {"initial_cube_state", new_game_session.initial_cube_state}
+    };
+    return MessageHandler::craftResponse("success", {{"game_session", game_session_json}});
 }
 
-nlohmann::json Room::canStartGame() {
-    for (const auto& participant : participants) {
-        if (participant.participant_type == "PLAYER" && !participant.is_ready) {
-            return MessageHandler::craftResponse("error", {{"message", "Not all players are ready"}});
+std::string Room::initCubeState(int game_session_id) {
+    std::string output; // initial string for storing cube state
+    
+    Cube cube_state = Random_Cube(output);
+
+    if (output.length() <= 0) {
+        return MessageHandler::craftResponse("error", {{"message", "Cannot init cube"}});
+    }
+
+    std::string cube_state_string = "";
+
+    for(int i = 0; i < 6; i++){
+        for(int j = 0; j < 8; j++){
+            cube_state_string = cube_state_string + cube_state.color[i][j] + " ";
         }
     }
-    return MessageHandler::craftResponse("success", {{"message", "All players are ready"}});
+    cube_state_string[cube_state_string.size() -1] = '\0';
+    return cube_state_string;
 }
 
-nlohmann::json Room::initCubeState() {
-    // INSERT NEW INITIAL CUBE STATE RECORD INTO DATABASE, return it as string format
-    return "first cube state goes here";
+RoomParticipant Room::findParticipantById(int participant_id) {
+    for (RoomParticipant& participant : this->participants) {
+        if (participant_id == participant.id) {
+            return participant;
+        }
+    }
+    throw runtime_error("Participant not found and thus cannot be removed from room participant list");
+}
+
+nlohmann::json Room::removeRoomParticipant(int participant_id) {
+    // Remove participant from room
+    auto it = std::remove_if(this->participants.begin(), this->participants.end(), [participant_id](const RoomParticipant& participant) {
+        return participant.participant_id == participant_id;
+    });
+
+    if (it != this->participants.end()) {
+        this->participants.erase(it, this->participants.end());
+        return MessageHandler::craftResponse("success", {{"message", "Participant removed from RoomParticipant successfully"}});
+    } else {
+        return MessageHandler::craftResponse("error", {{"message", "Participant not found"}});
+    }
+}
+
+nlohmann::json Room::toJson() const{
+    nlohmann::json room_json = {
+        {"id", this->id},
+        {"created_by", this->created_by},
+        {"created_at", this->created_at},
+        {"max_players", this->max_players},
+        {"max_spectators", this->max_spectators},
+        {"status", this->status},
+        {"current_players", this->current_players},
+        {"current_spectators", this->current_spectators}
+    };
+    return room_json;
 }

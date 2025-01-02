@@ -12,6 +12,7 @@
 
 using namespace std;
 
+class Server;
 class RoomParticipant {
 public:
     int id;
@@ -23,8 +24,8 @@ public:
     RoomParticipant(int room_id, RoomParticipantStatus participant_type, int participant_id, bool is_ready)
         : room_id(room_id), participant_type(participant_type), participant_id(participant_id), is_ready(is_ready), joined_at(getCurrentTime()) {}
 
-    nlohmann::json leaveRoom();
-    nlohmann::json isReady(int room_id);
+    nlohmann::json leaveRoom(Server &server);
+    nlohmann::json isReady();
 
     static time_t getCurrentTime() {
         using namespace std::chrono;

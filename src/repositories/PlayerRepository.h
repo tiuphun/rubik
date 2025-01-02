@@ -5,8 +5,10 @@
 #include "../models/header/Player.h"
 #include <sqlite3.h>
 
+
 using namespace std;
 
+class Player;
 class PlayerRepository {
 public:
     PlayerRepository(sqlite3* db) : db(db) {}

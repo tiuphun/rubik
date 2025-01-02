@@ -7,6 +7,7 @@
 
 using namespace std;
 
+class Admin;
 class AdminRepository {
 public:
     AdminRepository(sqlite3* db) : db(db) {}

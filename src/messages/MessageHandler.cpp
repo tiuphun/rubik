@@ -4,7 +4,6 @@
 #include "../models/header/Admin.h"
 #include "../models/header/Room.h"
 #include "../models/header/RoomParticipant.h"
-#include "../models/header/PlayerGameSession.h"
 #include "../models/header/GameSession.h"
 
 json MessageHandler::parseMessage(const std::string& message) {
@@ -31,8 +30,6 @@ json MessageHandler::handleMessage(const json& parsed_message, sqlite3* db) {
         response_data = handleReady(parsed_message, db);
     } else if (type == "START_GAME") {
         response_data = handleStartGame(parsed_message, db);
-    } else if (type == "MOVE_UPDATE") {
-        response_data = handleMove(parsed_message, db);
     } else if (type == "CUBE_UPDATE") {
         response_data = handleCube(parsed_message, db);
     } else if (type == "END_GAME") {

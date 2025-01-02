@@ -19,6 +19,11 @@
 
 using namespace std;
 
+class Player;
+class Admin;
+class Room;
+class PlayerRepository;
+class AdminRepository;
 class Server {
 public:
     Server();                     
@@ -41,17 +46,24 @@ public:
 
     sqlite3* getDb(); // Public getter for db
 
+    static int room_id_counter;
+    static int game_session_id_counter;
+    static int player_game_session_id_counter;
+
+    vector<Player> players;
+    vector<Admin> admins;
+    vector<Room> rooms;
+
 private:
     int server_socket; 
     sqlite3 *db;
     const char* db_path = "/Volumes/DATA/repository/rubikServer/rubik/src/database/migration/Rubik.db";
     //Repository helper classes to fetch user data:
-    PlayerRepository playerRepo;
-    AdminRepository adminRepo;
+    PlayerRepository *playerRepo;
+    AdminRepository *adminRepo;
 
-    vector<Player> players;
-    vector<Admin> admins;
-    vector<Room> rooms;
+    
+
 };
 
 #endif
