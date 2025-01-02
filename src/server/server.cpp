@@ -14,7 +14,7 @@ int Server::room_id_counter = 1;
 int Server::game_session_id_counter = 1;
 int Server::player_game_session_id_counter = 1;
 
-Server::Server() : playerRepo(db), adminRepo(db) {
+Server::Server(){
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
         cerr << "Failed to create socket\n";
@@ -44,7 +44,8 @@ Server::Server() : playerRepo(db), adminRepo(db) {
         close(server_socket);
         exit(1);
     }
-
+    playerRepo = new PlayerRepository(db);
+    adminRepo = new AdminRepository(db);
     cout << "Database initialization successful!\n"; 
 }
 

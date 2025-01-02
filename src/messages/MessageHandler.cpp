@@ -4,7 +4,6 @@
 #include "../models/header/Admin.h"
 #include "../models/header/Room.h"
 #include "../models/header/RoomParticipant.h"
-#include "../models/header/PlayerGameSession.h"
 #include "../models/header/GameSession.h"
 
 json MessageHandler::parseMessage(const std::string& message) {

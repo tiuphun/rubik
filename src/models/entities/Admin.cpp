@@ -8,7 +8,7 @@
 #include "../../messages/MessageHandler.h"
 
 nlohmann::json Admin::banPlayer(int player_id, Server& server) {
-    const char* check_sql = Query::SELECT_PLAYER_BY_ID
+    const char* check_sql = Query::SELECT_PLAYER_BY_ID;
 
     const char* sql = Query::BAN_PLAYER;
     sqlite3_stmt* stmt;
@@ -30,7 +30,7 @@ nlohmann::json Admin::banPlayer(int player_id, Server& server) {
     return MessageHandler::craftResponse("success", {{"message", "Player banned successfully"}});
 }
 
-nlohmann::json Admin::viewPlayerList() {
+nlohmann::json Admin::viewPlayerList(Server &server) {
     const char* sql = Query::SELECT_ALL_PLAYER;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
@@ -54,7 +54,7 @@ nlohmann::json Admin::viewPlayerList() {
     return MessageHandler::craftResponse("success", {{"players", players}});
 }
 
-nlohmann::json Admin::viewRoomList() {
+nlohmann::json Admin::viewRoomList(Server &server) {
     const char* sql = Query::SELECT_ALL_AVAILABLE_ROOM;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);

@@ -12,6 +12,7 @@
 
 using namespace std;
 
+class Server;
 class RoomParticipant {
 public:
     int id;

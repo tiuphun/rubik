@@ -36,7 +36,7 @@ public:
     nlohmann::json addRoomParticipant(RoomParticipant room_participant);
     nlohmann::json removeRoomParticipant(int participant_id);
     RoomParticipant findParticipantById(int participant_id);
-
+    nlohmann::json toJson() const;
     sqlite3* db;
 };
 

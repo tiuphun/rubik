@@ -74,3 +74,17 @@ nlohmann::json Room::removeRoomParticipant(int participant_id) {
         return MessageHandler::craftResponse("error", {{"message", "Participant not found"}});
     }
 }
+
+nlohmann::json Room::toJson() const{
+    nlohmann::json room_json = {
+        {"id", this->id},
+        {"created_by", this->created_by},
+        {"created_at", this->created_at},
+        {"max_players", this->max_players},
+        {"max_spectators", this->max_spectators},
+        {"status", this->status},
+        {"current_players", this->current_players},
+        {"current_spectators", this->current_spectators}
+    };
+    return room_json;
+}

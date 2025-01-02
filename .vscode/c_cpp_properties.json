@@ -12,7 +12,8 @@
                 "${workspaceFolder}/src/models/header",
                 "${workspaceFolder}/src/database/header",
                 "${workspaceFolder}/src/messages",
-                "${workspaceFolder}/src/services"
+                "${workspaceFolder}/src/services",
+                "${workspaceFolder}/src/repositories"
             ],
             "defines": [],
             "macFrameworkPath": [

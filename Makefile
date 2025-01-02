@@ -16,6 +16,7 @@ SRCS = $(wildcard $(SRC_DIR)/main/*.cpp) \
        $(wildcard $(SRC_DIR)/models/entities/*.cpp) \
        $(wildcard $(SRC_DIR)/services/*.cpp) \
        $(wildcard $(SRC_DIR)/messages/*.cpp) \
+       $(wildcard $(SRC_DIR)/repositories/*.cpp) \
 
 # Object files
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
@@ -29,6 +30,7 @@ INCLUDES = -I$(SRC_DIR)/constants \
            -I$(SRC_DIR)/states \
            -I$(SRC_DIR)/messages \
            -I$(SRC_DIR)/services \
+           -I$(SRC_DIR)/repositories \
               -Iinclude
 
 # Target executable
