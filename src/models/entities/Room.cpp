@@ -8,62 +8,48 @@
 #include "../../messages/MessageHandler.h"
 #include <chrono>
 #include "../../services/GenCube.h"
+#include <string.h>
 
 using namespace std;
 using namespace std::chrono;
 
-nlohmann::json Room::startGameSession(int game_session_id, int player_id, const string initial_cube_state) {
+nlohmann::json Room::startGameSession(int player_id, const string initial_cube_state, int room_id) {
     // Check if game session is already started
-    if (this->game_session.id != -1) {
-        return MessageHandler::craftResponse("error", {{"message", "Game session already started"}});
-    }
 
-    int new_game_session_id = server.game_session_id_counter++;
-    // Start game session
+    int player_game_session_id = server.player_game_session_id_counter;
     auto now = system_clock::now();
     auto now_time_t = system_clock::to_time_t(now);
-    this->game_session = GameSession(new_game_session_id,this->id, now_time_t,0,0 , GameSessionStatus::IN_SESSION, initial_cube_state, 0);
-    return MessageHandler::craftResponse("success", {{"message", "Game session with id: " + to_string(new_game_session_id) + "of Room id:" + to_string(this->id)+ " started successfully"}});
+    GameSession new_game_session = GameSession(Server::game_session_id_counter, room_id, player_id, now_time_t ,0, 0, GameSessionStatus::IN_SESSION, initial_cube_state);
+    nlohmann::json game_session_json = {
+        {"id", new_game_session.id},
+        {"room_id", new_game_session.room_id},
+        {"player_id", new_game_session.player_id},
+        {"start_time", new_game_session.start_time},
+        {"end_time", new_game_session.end_time},
+        {"status", new_game_session.status},
+        {"initial_cube_state", new_game_session.initial_cube_state}
+    };
+    return MessageHandler::craftResponse("success", {{"game_session", game_session_json}});
 }
 
-nlohmann::json Room::canStartGame() {
-    bool canStart = true;
-    for (const auto& participant : participants) {
-        if (participant.participant_type == RoomParticipantStatus::PLAYER && !participant.is_ready) {
-            bool canStart = false;
-            break;
-        }
-    }
-    if (canStart)
-    {
-        return MessageHandler::craftResponse("success", {{"message", "Game can start"}});
-    } else {
-        return MessageHandler::craftResponse("error", {{"message", "Game cannot start"}});
-    }
-}
-
-nlohmann::json Room::initCubeState(int game_session_id) {
+std::string Room::initCubeState(int game_session_id) {
     std::string output; // initial string for storing cube state
     
-    CubeState cube_state;
-    cube_state.id = 1; 
-    cube_state.player_game_session_id = game_session_id; 
-    cube_state.cube = Random_Cube(output); 
-    cube_state.validation_timestamp = std::time(nullptr); 
-    cube_state.validation_result = ValidationStatus::VALID; 
+    Cube cube_state = Random_Cube(output);
 
-    if (cube_state.cube == NULL) {
-        return MessageHandler::craftResponse("error", {"message", "Cannot init cube"})
+    if (output.length() <= 0) {
+        return MessageHandler::craftResponse("error", {{"message", "Cannot init cube"}});
     }
-    nlohmann::json initial_cube_state = {
-        {"id", cube_state.id},
-        {"player_game_session_id", cube_state.player_game_session_id},
-        {"cube", cube_state.cube},
-        {"validation_timestamp", cube_state.validation_timestamp},
-        {"validation_result", cube_state.validation_result == ValidationStatus::VALID ? "VALID" : "INVALID"}
-    };
-    return MessageHandler::craftResponse("success", {{"message", "Cube state initialized successfully"}, {"initial_cube_state", cube_state_json}});
 
+    std::string cube_state_string = "";
+
+    for(int i = 0; i < 6; i++){
+        for(int j = 0; j < 8; j++){
+            cube_state_string = cube_state_string + cube_state.color[i][j] + " ";
+        }
+    }
+    cube_state_string[cube_state_string.size() -1] = '\0';
+    return cube_state_string;
 }
 
 RoomParticipant Room::findParticipantById(int participant_id) {
