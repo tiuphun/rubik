@@ -74,6 +74,7 @@
         "__string": "cpp",
         "chrono": "cpp",
         "compare": "cpp",
-        "concepts": "cpp"
+        "concepts": "cpp",
+        "span": "cpp"
     }
 }
