@@ -10,6 +10,7 @@
 using namespace std;
 
 class Server;
+
 class Player {
 public:
     int id;
@@ -26,16 +27,43 @@ public:
     int socket_fd;
 
     Server& server;
-    Player(Server& srv) : server(srv) { socket_fd = -1; }
 
-    Player(int id, const string& username, const string& password_hash, time_t join_date, int total_games, int wins, float best_time, float avg_time, PlayerStatus status, time_t ban_date, int ban_by, Server& server)
-        : id(id), username(username), password_hash(password_hash), join_date(join_date), total_games(total_games), wins(wins), best_time(best_time), avg_time(avg_time), status(status), ban_date(ban_date), ban_by(ban_by), socket_fd(-1), server(server) {}
+    // Default constructor
+    Player() : server(dummyServer), socket_fd(-1) {}
+
+    // Constructor with only Server reference
+    Player(Server& srv) : server(srv), socket_fd(-1) {}
+
+    // Constructor with all member variables
+    Player(int id, const string& username, const string& password_hash, time_t join_date, int total_games, int wins, float best_time, float avg_time, PlayerStatus status, time_t ban_date, int ban_by, int socket_fd, Server& server)
+        : id(id), username(username), password_hash(password_hash), join_date(join_date), total_games(total_games), wins(wins), best_time(best_time), avg_time(avg_time), status(status), ban_date(ban_date), ban_by(ban_by), socket_fd(socket_fd), server(server) {}
+
+    // Custom assignment operator
+    Player& operator=(const Player& other) {
+        if (this != &other) {
+            id = other.id;
+            username = other.username;
+            password_hash = other.password_hash;
+            join_date = other.join_date;
+            total_games = other.total_games;
+            wins = other.wins;
+            best_time = other.best_time;
+            avg_time = other.avg_time;
+            status = other.status;
+            ban_date = other.ban_date;
+            ban_by = other.ban_by;
+            socket_fd = other.socket_fd;
+            // Note: server reference is not reassigned
+        }
+        return *this;
+    }
 
     nlohmann::json createRoom(int max_players, int max_spectators, Server& server);
-    nlohmann::json joinRoom(int room_id,  RoomParticipantStatus participant_type, Server& server);
+    nlohmann::json joinRoom(int room_id, RoomParticipantStatus participant_type, Server& server);
     nlohmann::json viewRoomList(Server& server);
 
-    sqlite3* db;
+private:
+    static Server dummyServer; // Dummy server instance for default constructor
 };
 
-#endif
+#endif // PLAYER_H

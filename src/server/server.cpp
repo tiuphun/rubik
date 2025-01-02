@@ -1,6 +1,10 @@
 #include <sstream>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <vector>
+#include <mutex>
 #include "../database/header/database.h"
 #include "../database/queries/Query.h"
 #include "Server.h"
@@ -12,7 +16,6 @@ using namespace std;
 
 int Server::room_id_counter = 1;
 int Server::game_session_id_counter = 1;
-int Server::player_game_session_id_counter = 1;
 
 Server::Server(){
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -44,8 +47,8 @@ Server::Server(){
         close(server_socket);
         exit(1);
     }
-    playerRepo = new PlayerRepository(db);
-    adminRepo = new AdminRepository(db);
+    playerRepo = new PlayerRepository(db,-1, *this);
+    adminRepo = new AdminRepository(db,-1, *this);
     cout << "Database initialization successful!\n"; 
 }
 
@@ -90,6 +93,22 @@ void Server::start() {
         }
 
         cout << "New client connected\n";
+
+        pid_t pid = fork();
+        if (pid < 0) {
+            cerr << "Fork failed\n";
+            close(server_socket);
+            continue;
+        }
+        if (pid == 0) {
+            close(server_socket);
+            handleClient(client_socket);
+            close(client_socket);
+            exit(0);
+        } else {
+            close(client_socket);
+            waitpid(-1, nullptr, WNOHANG);
+        }
         handleClient(client_socket);
     }
 }
@@ -119,7 +138,7 @@ vector<Room>& Server::getRooms() {
 }
 
 Room Server::getRoomById(int room_id){
-    for (const Room& room: rooms)
+    for (const Room& room: this->rooms)
     {
         if (room.id == room_id)
         {

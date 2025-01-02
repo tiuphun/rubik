@@ -5,19 +5,22 @@
 #include "../models/header/Player.h"
 #include <sqlite3.h>
 
+class Server;
 
-using namespace std;
-
-class Player;
 class PlayerRepository {
 public:
-    PlayerRepository(sqlite3* db) : db(db) {}
+    PlayerRepository(sqlite3* db, int socket_fd, Server& server)
+        : db(db), socket_fd(socket_fd), server(server) {}
 
-    vector<Player> getAllPlayers();
+    std::vector<Player> getAllPlayers();
     Player getPlayerById(int id);
 
 private:
     sqlite3* db;
+    int socket_fd;
+    Server& server;
+
+    Player createPlayerFromStmt(sqlite3_stmt* stmt);
 };
 
-#endif
+#endif // PLAYERREPOSITORY_H

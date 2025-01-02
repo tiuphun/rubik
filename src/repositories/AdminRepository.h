@@ -5,16 +5,19 @@
 #include "../models/header/Admin.h"
 #include <sqlite3.h>
 
-using namespace std;
+class Server;
 
-class Admin;
 class AdminRepository {
 public:
-    AdminRepository(sqlite3* db) : db(db) {}
+    AdminRepository(sqlite3* db, int socket_fd,Server &server) : db(db), socket_fd(socket_fd), server(server) {}
     Admin getAdminById(int id);
 
 private:
     sqlite3* db;
+    int socket_fd;
+    Server& server;
+
+    Admin createAdminFromStmt(sqlite3_stmt* stmt);
 };
 
 #endif

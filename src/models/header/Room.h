@@ -9,7 +9,7 @@
 #include "Const.h"
 #include <sqlite3.h>
 #include "../../include/nlohmann/json.hpp"
-#include "../server/Server.h"
+#include "../../src/server/Server.h"
 
 using namespace std;
 

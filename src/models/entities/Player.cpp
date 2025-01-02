@@ -13,6 +13,8 @@
 using namespace std;
 using namespace std::chrono;
 
+Server Player::dummyServer;
+
 nlohmann::json Player::viewRoomList(Server& server) {
     vector<Room> rooms = server.getRooms();
     nlohmann::json rooms_json = nlohmann::json::array();
