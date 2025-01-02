@@ -10,7 +10,7 @@
 using namespace std;
 
 json Room::startGameSession(int game_session_id, int player_id, string initial_cube_state) {
-    string initial_cube_state = initCubeState();
+    // string initial_cube_state = initCubeState();
     const char* sql = Query::INSERT_GAME_SESSION;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);

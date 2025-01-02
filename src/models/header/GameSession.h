@@ -31,8 +31,8 @@ public:
     GameSession(int id, int room_id, time_t start_time, time_t end_time, int total_moves, GameSessionStatus status, const string& initial_cube_state, int winner_id, sqlite3* db)
         : id(id), room_id(room_id), start_time(start_time), end_time(end_time), total_moves(total_moves), status(status), initial_cube_state(initial_cube_state), winner_id(winner_id), db(db) {}
 
-    json createPlayerGameSessions(const vector<int>& playerIds, int cube_state_id);
-    json endGameSession(int player_id);
+    nlohmann::json createPlayerGameSessions(const vector<int>& playerIds, int cube_state_id);
+    nlohmann::json endGameSession(int player_id);
     
 };
 

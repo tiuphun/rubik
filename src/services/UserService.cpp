@@ -2,6 +2,9 @@
 #include "../database/queries/Query.h"
 #include "openssl/sha.h"
 #include "../messages/MessageHandler.h"
+#include "Server.h"
+
+Server server;
 
 json UserService::signUp(const string& username, const string& password) {
     // Hash the password
@@ -16,10 +19,9 @@ json UserService::signUp(const string& username, const string& password) {
     if (rc != SQLITE_OK) {
         return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
     }
-    this->playerLatestId++;
-    sqlite3_bind_int(stmt, 1, this->playerLatestId);
-    sqlite3_bind_text(stmt, 2, username.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, password_hash.c_str(), -1, SQLITE_STATIC);
+
+    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, password_hash.c_str(), -1, SQLITE_STATIC);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
@@ -53,6 +55,7 @@ json UserService::signIn(const string& username, const string& password) {
         const unsigned char* db_password_hash = sqlite3_column_text(stmt, 2);
         if (password_hash == reinterpret_cast<const char*>(db_password_hash)) {
             sqlite3_finalize(stmt);
+
             return MessageHandler::craftResponse("success", {{"message", "User signed in successfully"}});
         }
     }

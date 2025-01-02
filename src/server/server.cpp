@@ -1,6 +1,10 @@
 #include <sstream>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <vector>
+#include <mutex>
 #include "../database/header/database.h"
 #include "../database/queries/Query.h"
 #include "Server.h"
@@ -71,11 +75,6 @@ void Server::processMessage(const std::string& message, int client_socket) {
     send(client_socket, response_str.c_str(), response_str.length(), 0);
 }
 
-void Server::initializeUsers(){
-    players = playerRepo.getAllPlayers();
-    admins  = adminRepo.getAllAdmins();
-}
-
 void Server::start() {
     while (true) {
         struct sockaddr_in client_address;
@@ -88,6 +87,22 @@ void Server::start() {
         }
 
         cout << "New client connected\n";
+
+        pid_t pid = fork();
+        if (pid < 0) {
+            cerr << "Fork failed\n";
+            close(server_socket);
+            continue;
+        }
+        if (pid == 0) {
+            close(server_socket);
+            handleClient(client_socket);
+            close(client_socket);
+            exit(0);
+        } else {
+            close(client_socket);
+            waitpid(-1, nullptr, WNOHANG);
+        }
         handleClient(client_socket);
     }
 }

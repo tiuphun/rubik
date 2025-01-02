@@ -25,14 +25,13 @@ public:
     void start();                 
     void handleClient(int client_socket); 
     void processMessage(const string& message, int client_socket);
-    //Method to load all of the existing records of players and admin from the database.
-    void initializeUsers(); 
+
     //Handle vectors of entity data
     void addPlayer(const Player& player);
     void addAdmin(const Admin& admin);
     void addRoom(const Room& Room);
 
-    vector<Player>& getPlayers();
+    vector<Player>& getPlayers(); //Players online at the moment...
     vector<Admin>& getAdmins();
     vector<Room>& getRooms();
 

@@ -22,8 +22,8 @@ public:
     time_t joined_at;
     RoomParticipant(sqlite3* db) : db(db) {}
 
-    json leaveRoom();
-    json isReady(int room_id);
+    nlohmann::json leaveRoom();
+    nlohmann::json isReady(int room_id);
     
 private:
     sqlite3* db;

@@ -2,7 +2,7 @@
 #define MESSAGE_HANDLER_H
 
 #include <string>
-#include <nlohmann/json.hpp>
+#include <../../include/nlohmann/json.hpp>
 #include <sqlite3.h>
 
 using json = nlohmann::json;
@@ -17,6 +17,14 @@ private:
     static json handleSignIn(const json& parsed_message, sqlite3* db);
     static json handleCreateRoom(const json& parsed_message, sqlite3* db);
     static json handleJoinRoom(const json& parsed_message, sqlite3* db);
+    static json handleLeaveRoom(const json& parsed_message, sqlite3* db);
+    static json handleReady(const json& parsed_message, sqlite3* db);
+    static json handleStartGame(const json& parsed_message, sqlite3* db);
+    static json handleCube(const json& parsed_message, sqlite3* db);
+    static json handleEndGame(const json& parsed_message, sqlite3* db);
+    static json handleViewUsers(const json& parsed_message, sqlite3* db);
+    static json handleViewRooms(const json& parsed_message, sqlite3* db);
+    static json handleBanPlayer(const json& parsed_message, sqlite3* db);
 };
 
 #endif

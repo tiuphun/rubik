@@ -31,8 +31,6 @@ json MessageHandler::handleMessage(const json& parsed_message, sqlite3* db) {
         response_data = handleReady(parsed_message, db);
     } else if (type == "START_GAME") {
         response_data = handleStartGame(parsed_message, db);
-    } else if (type == "MOVE_UPDATE") {
-        response_data = handleMove(parsed_message, db);
     } else if (type == "CUBE_UPDATE") {
         response_data = handleCube(parsed_message, db);
     } else if (type == "END_GAME") {
@@ -41,6 +39,10 @@ json MessageHandler::handleMessage(const json& parsed_message, sqlite3* db) {
         response_data = handleViewUsers(parsed_message, db);
     } else if (type == "BAN_PLAYER") {
         response_data = handleBanPlayer(parsed_message, db);
+    } else if (type == "SPECTATE") {
+        // response_data = handleSpectate(parsed_message, db);
+    } else if (type == "READY") {
+        response_data = handleReady(parsed_message, db);
     } else {
         return craftResponse("error", {{"message", "Unknown message type"}});
     }
@@ -66,12 +68,6 @@ json MessageHandler::handleSignIn(const json& parsed_message, sqlite3* db) {
     return userService.signIn(username, password);
 }
 
-// cả admin và player đều đang có hàm này
-json MessageHandler::handleViewRooms(const json& parsed_message, sqlite3* db) {
-    Player player(db);
-    return player.viewRooms();
-}
-
 json MessageHandler::handleCreateRoom(const json& parsed_message, sqlite3* db) {
     Player player(db);
     int max_players = parsed_message["max_players"];
@@ -86,43 +82,42 @@ json MessageHandler::handleJoinRoom(const json& parsed_message, sqlite3* db) {
     return player.joinRoom(room_id, participant_type.c_str());
 }
 
-json MessageHandler::handleLeaveRoom(const json& parsed_message, sqlite3* db) {
-    Player player(db);
-    return player.leaveRoom();
-}
-
 json MessageHandler::handleReady(const json& parsed_message, sqlite3* db) {
-    Player player(db);
-    return player.ready();
+    RoomParticipant roomParticipant(db);
+    int room_id = parsed_message["room_id"];
+    return roomParticipant.isReady(room_id);
 }
 
-json MessageHandler::handleStartGame(const json& parsed_message, sqlite3* db) {
-    Player player(db);
-    return player.startGame();
-}
-
-json MessageHandler::handleMove(const json& parsed_message, sqlite3* db) {
-    Player player(db);
-    return player.move(parsed_message);
-}
-
-json MessageHandler::handleCube(const json& parsed_message, sqlite3* db) {
-    Player player(db);
-    return player.cube(parsed_message);
-}
-
-json MessageHandler::handleEndGame(const json& parsed_message, sqlite3* db) {
-    Player player(db);
-    return player.endGame();
+json MessageHandler::handleLeaveRoom(const json& parsed_message, sqlite3* db) {
+    RoomParticipant roomParticipant(db);
+    return roomParticipant.leaveRoom();
 }
 
 json MessageHandler::handleViewUsers(const json& parsed_message, sqlite3* db) {
-    Player player(db);
-    return player.viewUsers();
+    Admin admin(db);
+    return admin.viewPlayerList();
 }
 
 json MessageHandler::handleBanPlayer(const json& parsed_message, sqlite3* db) {
     Admin admin(db);
     int player_id = parsed_message["player_id"];
     return admin.banPlayer(player_id);
+}
+
+// cả admin và player đều đang có hàm này
+json MessageHandler::handleViewRooms(const json& parsed_message, sqlite3* db) {
+    Player player(db);
+    return player.viewRooms();
+}
+
+json MessageHandler::handleStartGame(const json& parsed_message, sqlite3* db) {
+    Player player(db);
+    return player.startGame();
+    //Missing gen cube function
+}
+
+json MessageHandler::handleEndGame(const json& parsed_message, sqlite3* db) {
+    GameSession gameSession(db);
+    int player_id = parsed_message["player_id"];
+    return gameSession.endGameSession(player_id);
 }

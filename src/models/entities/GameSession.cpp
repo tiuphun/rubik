@@ -58,26 +58,26 @@ json GameSession::endGameSession(int player_id) {
 
     sqlite3_finalize(stmt);
 
-    // Fetch game results
-    const char* result_sql = Query::SELECT_GAME_RESULTS;
-    rc = sqlite3_prepare_v2(db, result_sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK) {
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-    }
+    // Fetch game results from client
+    // const char* result_sql = Query::SELECT_GAME_RESULTS; // SHould be removed. Fetch game result from clients
+    // rc = sqlite3_prepare_v2(db, result_sql, -1, &stmt, nullptr);
+    // if (rc != SQLITE_OK) {
+    //     return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
+    // }
 
-    json results = json::array();
-    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
-        int id = sqlite3_column_int(stmt, 0);
-        const unsigned char* username = sqlite3_column_text(stmt, 1);
-        int completion_time = sqlite3_column_int(stmt, 2);
-        results.push_back({{"id", id}, {"username", std::string(reinterpret_cast<const char*>(username))}, {"completion_time", completion_time}});
-    }
+    // json results = json::array();
+    // while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+    //     int id = sqlite3_column_int(stmt, 0);
+    //     const unsigned char* username = sqlite3_column_text(stmt, 1);
+    //     int completion_time = sqlite3_column_int(stmt, 2);
+    //     results.push_back({{"id", id}, {"username", std::string(reinterpret_cast<const char*>(username))}, {"completion_time", completion_time}});
+    // }
 
-    if (rc != SQLITE_DONE) {
-        sqlite3_finalize(stmt);
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-    }
+    // if (rc != SQLITE_DONE) {
+    //     sqlite3_finalize(stmt);
+    //     return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
+    // }
 
-    sqlite3_finalize(stmt);
-    return MessageHandler::craftResponse("success", {{"results", results}});
+    // sqlite3_finalize(stmt);
+    return MessageHandler::craftResponse("success", {{"results", "results"}});
 }
