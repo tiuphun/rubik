@@ -29,7 +29,7 @@ public:
 
     PlayerGameSession(sqlite3* db) : db(db) {}
 
-    json updateCubeFromClient(string message);
+    nlohmann::json updateCubeFromClient(string message);
   
 private:
     sqlite3* db;

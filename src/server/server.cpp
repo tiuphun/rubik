@@ -10,7 +10,7 @@ using namespace std;
 
 #define PORT 8080
 
-Server::Server() : userService(nullptr), playerRepo(db), adminRepo(db) {
+Server::Server() : playerRepo(db), adminRepo(db) {
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
         cerr << "Failed to create socket\n";
@@ -41,9 +41,11 @@ Server::Server() : userService(nullptr), playerRepo(db), adminRepo(db) {
         exit(1);
     }
 
-    userService = UserService(db);
-
     cout << "Database initialization successful!\n"; 
+}
+
+sqlite3* Server::getDb() {
+    return db;
 }
 
 void Server::handleClient(int client_socket) {
@@ -69,11 +71,6 @@ void Server::processMessage(const std::string& message, int client_socket) {
     json response = MessageHandler::handleMessage(parsed_message, db);
     string response_str = response.dump();
     send(client_socket, response_str.c_str(), response_str.length(), 0);
-}
-
-void Server::initializeUsers(){
-    players = playerRepo.getAllPlayers();
-    admins  = adminRepo.getAllAdmins();
 }
 
 void Server::start() {
@@ -114,4 +111,17 @@ vector<Admin>& Server::getAdmins() {
 
 vector<Room>& Server::getRooms() {
     return rooms;
+}
+
+Room Server::getRoomById(int room_id){
+    for (const Room& room: rooms)
+    {
+        if (room.getId() == room_id)
+        {
+            return room;
+        }
+        
+    }
+    throw runtime_error("Room with id:" + to_string(room_id) + " not found when Player trying to get room");   
+    
 }

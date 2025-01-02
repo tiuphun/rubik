@@ -35,7 +35,7 @@ vector<Player> PlayerRepository::getAllPlayers() {
 }
 
 Player PlayerRepository::getPlayerById(int id) {
-    Player player(0, "", "", 0, 0, 0, 0.0f, 0.0f, PlayerStatus::INACTIVE, 0, 0);
+    Player player;
     const char* sql = Query::SELECT_PLAYER_BY_ID;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);

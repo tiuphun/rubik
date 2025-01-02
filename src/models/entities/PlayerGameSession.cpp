@@ -6,7 +6,7 @@
 #include "../../database/queries/Query.h"
 #include "../../messages/MessageHandler.h"
 
-json PlayerGameSession::updateCubeFromClient(string current_cube) {
+nlohmann::json PlayerGameSession::updateCubeFromClient(string current_cube) {
     // Parse the current cube state
     // Assuming current_cube is a string representation of the cube state
     // Example: "Y O Y Y Y O Y B B W B G B W B Y R Y R W R W R R G B G O G Y G G O G O R O R O B W O W G W B W R"

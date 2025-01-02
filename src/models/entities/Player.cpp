@@ -6,73 +6,36 @@
 #include "../../database/queries/Query.h"
 #include "Const.h"
 #include "../../messages/MessageHandler.h"
+#include "../../include/nlohmann/json.hpp"
+#include "../../server/Server.h"
 
-json Player::viewRoomList() {
-    const char* sql = Query::SELECT_ALL_AVAILABLE_ROOM;
-    sqlite3_stmt* stmt;
-    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK) {
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-    }
-
-    json rooms = json::array();
-    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
-        int room_id = sqlite3_column_int(stmt, 0);
-        rooms.push_back({{"room_id", room_id}});
-    }
-
-    if (rc != SQLITE_DONE) {
-        sqlite3_finalize(stmt);
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-    }
-
-    sqlite3_finalize(stmt);
-    return MessageHandler::craftResponse("success", {{"rooms", rooms}});
+nlohmann::json Player::viewRoomList(Server& server) {
+    vector<Room> rooms = server.getRooms();
+    return MessageHandler::craftResponse("success", {{"rooms", rooms}}); //Change this to return JSON with room list.
 }
 
-json Player::createRoom(int max_players, int max_spectators) {
-    const char* sql = Query::INSERT_ROOM;
-    sqlite3_stmt* stmt;
-    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK) {
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-    }
-
-    sqlite3_bind_int(stmt, 1, this->id);
-    sqlite3_bind_int(stmt, 2, max_players);
-    sqlite3_bind_int(stmt, 3, max_spectators);
-
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE) {
-        sqlite3_finalize(stmt);
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-    }
-
-    sqlite3_finalize(stmt);
-    int room_id = sqlite3_last_insert_rowid(db);
-    return MessageHandler::craftResponse("success", {{"message", "Room created successfully"}, {"room_id", room_id}});
+nlohmann::json Player::createRoom(int max_players, int max_spectators, Server& server) {
+    Room room(0, this->id, time(nullptr), max_players, max_spectators, RoomStatus::WAITING);
+    server.addRoom(room);
+    return MessageHandler::craftResponse("success", {{"message", "Room created successfully"}, {"room_id", room.id}});
 }
 
-json Player::joinRoom(int room_id, const char* participant_type) {
-    const char* sql = Query::INSERT_ROOM_PARTICIPANT;
-    sqlite3_stmt* stmt;
-    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK) {
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
+nlohmann::json Player::joinRoom(int room_id, RoomParticipantStatus participant_type, Server& server) {
+    Room joiningRoom = server.getRoomById(room_id);
+    if (joiningRoom.status != RoomStatus::WAITING) {
+        return MessageHandler::craftResponse("error", {{"message", "Room with id: " + to_string(room_id) + "does not have WAITING state"}});
+    }else{
+        if (participant_type == RoomParticipantStatus::PLAYER) {
+            RoomParticipant participant(room_id, RoomParticipantStatus::PLAYER, this->id, false);
+            joiningRoom.addRoomParticipant(participant);
+            return MessageHandler::craftResponse("success", {{"message", "Player joined the room as Player role successfully"}, {"room_id", room_id}});
+        } else if (participant_type == RoomParticipantStatus::PLAYER_SPECTATOR) {
+            RoomParticipant participant(room_id, RoomParticipantStatus::PLAYER_SPECTATOR, this->id, false);
+            joiningRoom.addRoomParticipant(participant);
+            return MessageHandler::craftResponse("success", {{"message", "Player joined the room as Player Spectator role successfully"}, {"room_id", room_id}});   
+        } else {
+            return MessageHandler::craftResponse("error", {{"message", "Invalid participant type"}});
+        }
     }
-
-    sqlite3_bind_int(stmt, 1, room_id);
-    sqlite3_bind_text(stmt, 2, participant_type, -1, SQLITE_STATIC);
-    sqlite3_bind_int(stmt, 3, this->id);
-    sqlite3_bind_int(stmt, 4, 0); // DEFAULT: NOT READY after joined
-
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE) {
-        sqlite3_finalize(stmt);
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-    }
-
-    sqlite3_finalize(stmt);
-    return MessageHandler::craftResponse("success", {{"message", "Player joined the room successfully"}, {"room_id", room_id}});
 }
 

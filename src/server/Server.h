@@ -25,8 +25,7 @@ public:
     void start();                 
     void handleClient(int client_socket); 
     void processMessage(const string& message, int client_socket);
-    //Method to load all of the existing records of players and admin from the database.
-    void initializeUsers(); 
+    
     //Handle vectors of entity data
     void addPlayer(const Player& player);
     void addAdmin(const Admin& admin);
@@ -36,12 +35,16 @@ public:
     vector<Admin>& getAdmins();
     vector<Room>& getRooms();
 
+    Room getRoomById(int room_id);
+    Admin getAdminById(int admin_id);
+    Player getPlayerById(int player_id);
+
+    sqlite3* getDb(); // Public getter for db
+
 private:
     int server_socket; 
     sqlite3 *db;
     const char* db_path = "/Volumes/DATA/repository/rubikServer/rubik/src/database/migration/Rubik.db";
-    UserService userService;
-
     //Repository helper classes to fetch user data:
     PlayerRepository playerRepo;
     AdminRepository adminRepo;

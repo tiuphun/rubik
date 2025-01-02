@@ -10,10 +10,7 @@ using namespace std;
 class AdminRepository {
 public:
     AdminRepository(sqlite3* db) : db(db) {}
-
-    vector<Admin> getAllAdmins();
     Admin getAdminById(int id);
-    bool insertAdmin(const Admin& admin);
 
 private:
     sqlite3* db;

@@ -189,8 +189,8 @@ const char* Query::CREATE_PLAYER_TABLE =
     ");";
 
 const char* Query::INSERT_PLAYER = 
-    "INSERT INTO Player(id,username,password_hash) "
-    "VALUES(?,?,?);";
+    "INSERT INTO Player(username,password_hash) "
+    "VALUES(?,?);";
 
 const char* Query::SELECT_ALL_PLAYER =
     "SELECT * FROM Player;";

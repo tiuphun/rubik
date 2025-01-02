@@ -7,7 +7,7 @@
 #include "Const.h"
 #include "../../messages/MessageHandler.h"
 
-json Admin::banPlayer(int player_id) {
+nlohmann::json Admin::banPlayer(int player_id) {
     const char* sql = Query::BAN_PLAYER;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
@@ -28,7 +28,7 @@ json Admin::banPlayer(int player_id) {
     return MessageHandler::craftResponse("success", {{"message", "Player banned successfully"}});
 }
 
-json Admin::viewPlayerList() {
+nlohmann::json Admin::viewPlayerList() {
     const char* sql = Query::SELECT_ALL_PLAYER;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
@@ -52,7 +52,7 @@ json Admin::viewPlayerList() {
     return MessageHandler::craftResponse("success", {{"players", players}});
 }
 
-json Admin::viewRoomList() {
+nlohmann::json Admin::viewRoomList() {
     const char* sql = Query::SELECT_ALL_AVAILABLE_ROOM;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
@@ -76,7 +76,7 @@ json Admin::viewRoomList() {
 }
 
 
-json Admin::spectate(int game_session_id, int room_id) {
+nlohmann::json Admin::spectate(int game_session_id, int room_id) {
     // Insert admin as a spectator into RoomParticipant
     const char* insert_sql = Query::INSERT_ROOM_PARTICIPANT;
     sqlite3_stmt* stmt;
@@ -140,7 +140,7 @@ json Admin::spectate(int game_session_id, int room_id) {
     return MessageHandler::craftResponse("success", {{"message", "Admin spectating the game"}});
 }
 
-json Admin::leaveGame(int room_id) {
+nlohmann::json Admin::leaveGame(int room_id) {
     const char* sql = Query::DELETE_FROM_ROOM_PARTICIPANT;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);

@@ -6,8 +6,8 @@
 #include "../../database/queries/Query.h"
 #include "../../messages/MessageHandler.h"
 
-json GameSession::createPlayerGameSessions(const vector<int>& playerIds, int cube_state_id) {
-    json response_data = json::array();
+nlohmann::json GameSession::createPlayerGameSessions(const vector<int>& playerIds, int cube_state_id) {
+    nlohmann::json response_data = json::array();
     for (int player_id : playerIds) {
         const char* sql = Query::INSERT_PLAYER_GAME_SESSION;
         sqlite3_stmt* stmt;
@@ -40,7 +40,8 @@ json GameSession::createPlayerGameSessions(const vector<int>& playerIds, int cub
     return MessageHandler::craftResponse("success", {{"player_game_sessions", response_data}});
 }
 
-json GameSession::endGameSession(int player_id) {
+nlohmann::json GameSession::endGameSession(int player_id) {
+    /*
     const char* sql = Query::END_GAME_SESSION;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
@@ -80,4 +81,7 @@ json GameSession::endGameSession(int player_id) {
 
     sqlite3_finalize(stmt);
     return MessageHandler::craftResponse("success", {{"results", results}});
+    */
+    
+    return MessageHandler::craftResponse("success", {{"results", "hello"}}); // Delete this later
 }
