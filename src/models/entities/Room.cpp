@@ -7,6 +7,7 @@
 #include "../../database/queries/Query.h"
 #include "../../messages/MessageHandler.h"
 #include <chrono>
+#include "../../services/GenCube.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -33,7 +34,6 @@ nlohmann::json Room::canStartGame() {
             break;
         }
     }
-
     if (canStart)
     {
         return MessageHandler::craftResponse("success", {{"message", "Game can start"}});
@@ -42,8 +42,28 @@ nlohmann::json Room::canStartGame() {
     }
 }
 
-nlohmann::json Room::initCubeState() {
-   
+nlohmann::json Room::initCubeState(int game_session_id) {
+    std::string output; // initial string for storing cube state
+    
+    CubeState cube_state;
+    cube_state.id = 1; 
+    cube_state.player_game_session_id = game_session_id; 
+    cube_state.cube = Random_Cube(output); 
+    cube_state.validation_timestamp = std::time(nullptr); 
+    cube_state.validation_result = ValidationStatus::VALID; 
+
+    if (cube_state.cube == NULL) {
+        return MessageHandler::craftResponse("error", {"message", "Cannot init cube"})
+    }
+    nlohmann::json initial_cube_state = {
+        {"id", cube_state.id},
+        {"player_game_session_id", cube_state.player_game_session_id},
+        {"cube", cube_state.cube},
+        {"validation_timestamp", cube_state.validation_timestamp},
+        {"validation_result", cube_state.validation_result == ValidationStatus::VALID ? "VALID" : "INVALID"}
+    };
+    return MessageHandler::craftResponse("success", {{"message", "Cube state initialized successfully"}, {"initial_cube_state", cube_state_json}});
+
 }
 
 RoomParticipant Room::findParticipantById(int participant_id) {
