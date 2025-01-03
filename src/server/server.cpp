@@ -1,103 +1,131 @@
-#include <iostream>
-#include <thread>
-#include <vector>
-#include <string>
-#include <cstring> // For memset
-#include <cstdlib> // For exit()
-#include <netinet/in.h> // For sockaddr_in
-#include <unistd.h> // For close()
-#include <arpa/inet.h> // For inet_ntoa
-#include <nlohmann/json.hpp> // Include JSON library
+#include <sstream>
+#include <unistd.h>
+#include <sys/socket.h>
+#include "../database/header/database.h"
+#include "../database/queries/Query.h"
+#include "Server.h"
+#include "../messages/MessageHandler.h"
 
-using json = nlohmann::json;
-const int PORT = 8080; // Server port
-const int BUFFER_SIZE = 1024;
+using namespace std;
 
-// Function to handle individual client connections
-void handleClient(int clientSocket) {
-    char buffer[BUFFER_SIZE];
-    memset(buffer, 0, BUFFER_SIZE);
+#define PORT 8080
 
-    // Receive data from the client
-    ssize_t bytesReceived = recv(clientSocket, buffer, BUFFER_SIZE, 0);
-    if (bytesReceived < 0) {
-        std::cerr << "Error receiving data from client." << std::endl;
-        close(clientSocket);
-        return;
+int Server::room_id_counter = 1;
+int Server::game_session_id_counter = 1;
+int Server::player_game_session_id_counter = 1;
+
+Server::Server() : playerRepo(db), adminRepo(db) {
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1) {
+        cerr << "Failed to create socket\n";
+        exit(1);
     }
 
-    std::cout << "Message received: " << buffer << std::endl;
+    struct sockaddr_in address;
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(PORT);
 
-    // Parse the received message as JSON
-    try {
-        json receivedData = json::parse(buffer);
-        std::cout << "Parsed JSON: " << receivedData.dump(4) << std::endl;
-
-        // Example: Respond to a ping message
-        if (receivedData["type"] == "ping") {
-            json response = {{"type", "pong"}, {"message", "Hello from server!"}};
-            std::string responseStr = response.dump();
-            send(clientSocket, responseStr.c_str(), responseStr.length(), 0);
-        }
-    } catch (json::parse_error &e) {
-        std::cerr << "JSON parsing error: " << e.what() << std::endl;
+    if (::bind(server_socket, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        cerr << "Bind failed\n";
+        exit(1);
     }
 
-    // Close the connection
-    close(clientSocket);
-    std::cout << "Client disconnected." << std::endl;
+    if (listen(server_socket, 3) < 0) {
+        cerr << "Listen failed\n";
+        exit(1);
+    }
+
+    cout << "Server listening on port " << PORT << "...\n";
+    
+    int rc = sqlite3_open(db_path, &db);
+    if(rc != SQLITE_OK){
+        cerr << "Database init failed: " << sqlite3_errmsg(db) << "\n";
+        close(server_socket);
+        exit(1);
+    }
+
+    cout << "Database initialization successful!\n"; 
 }
 
-int main() {
-    int serverSocket;
-    struct sockaddr_in serverAddr, clientAddr;
+sqlite3* Server::getDb() {
+    return db;
+}
 
-    // Create a socket
-    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (serverSocket == -1) {
-        std::cerr << "Socket creation failed!" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+void Server::handleClient(int client_socket) {
+    char buffer[1024] = {0};
+    string welcome_msg = "Welcome to the Rubik Server! Send your JSON messages.\n";
+    send(client_socket, welcome_msg.c_str(), welcome_msg.length(), 0);
 
-    // Configure server address
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = INADDR_ANY;
-    serverAddr.sin_port = htons(PORT);
-
-    // Bind the socket to the address
-    if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
-        std::cerr << "Binding failed!" << std::endl;
-        close(serverSocket);
-        exit(EXIT_FAILURE);
-    }
-
-    // Start listening for incoming connections
-    if (listen(serverSocket, 10) < 0) {
-        std::cerr << "Listening failed!" << std::endl;
-        close(serverSocket);
-        exit(EXIT_FAILURE);
-    }
-
-    std::cout << "Server is running on port " << PORT << "..." << std::endl;
-
-    // Accept incoming connections
     while (true) {
-        socklen_t clientLen = sizeof(clientAddr);
-        int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientLen);
+        int bytes_read = read(client_socket, buffer, 1024);
+        if (bytes_read <= 0) {
+            cout << "Client disconnected\n";
+            close(client_socket);
+            break;
+        }
 
-        if (clientSocket < 0) {
-            std::cerr << "Connection acceptance failed!" << std::endl;
+        string message(buffer, bytes_read);
+        processMessage(message, client_socket);
+    }
+}
+
+void Server::processMessage(const std::string& message, int client_socket) {
+    json parsed_message = MessageHandler::parseMessage(message);
+    json response = MessageHandler::handleMessage(parsed_message, db);
+    string response_str = response.dump();
+    send(client_socket, response_str.c_str(), response_str.length(), 0);
+}
+
+void Server::start() {
+    while (true) {
+        struct sockaddr_in client_address;
+        socklen_t client_address_len = sizeof(client_address);
+        int client_socket = accept(server_socket, (struct sockaddr *)&client_address, &client_address_len);
+        
+        if (client_socket < 0) {
+            cerr << "Accept failed\n";
             continue;
         }
 
-        std::cout << "Connected to client: " << inet_ntoa(clientAddr.sin_addr) << std::endl;
-
-        // Handle the client in a new thread
-        std::thread clientThread(handleClient, clientSocket);
-        clientThread.detach();
+        cout << "New client connected\n";
+        handleClient(client_socket);
     }
+}
 
-    // Close the server socket
-    close(serverSocket);
-    return 0;
+void Server::addPlayer(const Player& player) {
+    players.push_back(player);
+}
+
+void Server::addAdmin(const Admin& admin) {
+    admins.push_back(admin);
+}
+
+void Server::addRoom(const Room& room) {
+    rooms.push_back(room);
+}
+
+vector<Player>& Server::getPlayers() {
+    return players;
+}
+
+vector<Admin>& Server::getAdmins() {
+    return admins;
+}
+
+vector<Room>& Server::getRooms() {
+    return rooms;
+}
+
+Room Server::getRoomById(int room_id){
+    for (const Room& room: rooms)
+    {
+        if (room.id == room_id)
+        {
+            return room;
+        }
+        
+    }
+    throw runtime_error("Room with id:" + to_string(room_id) + " not found when Player trying to get room");   
+    
 }

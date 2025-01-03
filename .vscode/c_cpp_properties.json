@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/src/constants",
+                "${workspaceFolder}/src/database",
+                "${workspaceFolder}/src/models",
+                "${workspaceFolder}/src/server",
+                "${workspaceFolder}/src/states",
+                "${workspaceFolder}/src/models/header",
+                "${workspaceFolder}/src/database/header",
+                "${workspaceFolder}/src/messages",
+                "${workspaceFolder}/src/services"
+            ],
+            "defines": [],
+            "macFrameworkPath": [
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "macos-clang-arm64"
+        }
+    ],
+    "version": 4
+}
