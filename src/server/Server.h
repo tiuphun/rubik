@@ -27,10 +27,6 @@ public:
         return this->db;
     } 
 
-    static int room_id_counter;
-    static int game_session_id_counter;
-    static int player_game_session_id_counter;
-
 private:
     unique_ptr<EntityManager> entityManager;
     int server_socket; 

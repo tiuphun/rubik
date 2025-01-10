@@ -6,6 +6,7 @@
 #include "../include/nlohmann/json.hpp"
 #include "../repositories/PlayerRepository.h"
 #include "../repositories/AdminRepository.h"
+#include "../repositories/AuthRepository.h"
 #include "../models/header/EntityManager.h"
 
 using json = nlohmann::json;
@@ -14,10 +15,12 @@ using namespace std;
 class UserService {
 public:
     UserService(PlayerRepository& playerRepo, 
-                AdminRepository& adminRepo, 
+                AdminRepository& adminRepo,
+                AuthRepository& authRepo, 
                 EntityManager& entityManager)
         : playerRepo(playerRepo)
         , adminRepo(adminRepo)
+        , authRepo(authRepo)
         , entityManager(entityManager){}
 
     json signUp(const string& username, const string& password);
@@ -26,7 +29,9 @@ public:
 private:
     PlayerRepository& playerRepo;
     AdminRepository& adminRepo;
+    AuthRepository& authRepo;
     EntityManager& entityManager;
+
 };
 
 #endif

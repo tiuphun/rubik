@@ -5,10 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src/constants",
-                "${workspaceFolder}/src/database",
-                "${workspaceFolder}/src/models",
                 "${workspaceFolder}/src/server",
-                "${workspaceFolder}/src/states",
                 "${workspaceFolder}/src/models/header",
                 "${workspaceFolder}/src/database/header",
                 "${workspaceFolder}/src/messages",

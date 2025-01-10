@@ -1,6 +1,10 @@
 #include "EntityManager.h"
 #include <algorithm>
 
+
+int EntityManager::roomIdCounter = 1;
+int EntityManager::gameSessionIdCounter = 1;
+
 void EntityManager::addPlayer(unique_ptr<Player> player) {
     players.push_back(move(player));
 }

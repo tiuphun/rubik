@@ -1,10 +1,16 @@
-nlohmann::json RoomParticipant::leaveRoom(Server &server) {
-   Room room = server.getRoomById(this->room_id);
-   room.removeRoomParticipant(this->id);
-   return MessageHandler::craftResponse("success", {{"message", "RoomParticipant: " + to_string(this->id) + " left the room"}});
-}
+#include "RoomParticipantService.h"
 
-nlohmann::json RoomParticipant::isReady() {
-    this->is_ready = true;
-    return MessageHandler::craftResponse("success", {{"message", "RoomParticipant: " + to_string(this->id) + " is ready"}});
+nlohmann::json RoomParticipantService::leaveRoom(int participantId, int roomId) {
+    auto* room = entityManager.getRoomById(roomId);
+    if (!room) {
+        return MessageHandler::craftResponse("error", {{"message", "Room not found"}});
+    }
+
+    if (!isValidParticipant(participantId, roomId)) {
+        return MessageHandler::craftResponse("error", {{"message", "Participant not found"}});
+    }
+
+    room->removeRoomParticipant(participantId);
+    return MessageHandler::craftResponse("success", 
+        {{"message", "Participant " + std::to_string(participantId) + " left the room"}});
 }

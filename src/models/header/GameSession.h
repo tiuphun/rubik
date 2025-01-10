@@ -25,6 +25,30 @@ public:
         : id(id), room_id(room_id), start_time(start_time), end_time(end_time), total_moves(total_moves), status(status), initial_cube_state(initial_cube_state) {}
 
     nlohmann::json endGameSession(int player_id);
+
+    nlohmann::json toJson() const {
+
+        return {
+
+            {"id", id},
+
+            {"room_id", room_id},
+
+            {"player_id", player_id},
+
+            {"start_time", start_time},
+
+            {"end_time", end_time},
+
+            {"total_moves", total_moves},
+
+            {"status", status},
+
+            {"initial_cube_state", initial_cube_state}
+
+        };
+
+    }
     
 };
 

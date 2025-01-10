@@ -1,39 +1,101 @@
-nlohmann::json Player::viewRoomList() {
-    vector<Room> rooms = server.getRooms();
-    nlohmann::json rooms_json = nlohmann::json::array();
-    for (const auto& room : rooms) {
-        rooms_json.push_back(room.toJson()); // Assuming Room has a toJson() method
+// PlayerService.cpp
+#include "PlayerService.h"
+#include "../messages/MessageHandler.h"
+#include <chrono>
+#include "../models/header/RoomParticipant.h"
+#include "../models/header/Room.h"
+#include "../constants/Const.h"
+
+using namespace std::chrono;
+using namespace std;
+
+nlohmann::json PlayerService::createRoom(int playerId, int max_players, int max_spectators) {
+    // Get player from entitymanager vector
+    auto* player = entityManager.getPlayerById(playerId);
+    if (!player) {
+        return MessageHandler::craftResponse("error", {{"message", "Player not found"}});
     }
-    return MessageHandler::craftResponse("success", {{"rooms", rooms_json}});
-}
 
-nlohmann::json Player::createRoom(int max_players, int max_spectators, Server& server) {
-    // Get the current time using chrono
     auto now = system_clock::now();
-    auto now_time_t = system_clock::to_time_t(now);
+    auto nowTimeT = system_clock::to_time_t(now);
 
-    // Create a new Room object
-    Room room(Server::room_id_counter++, this->id, now_time_t, max_players, max_spectators, RoomStatus::WAITING, server, vector<GameSession>(), 1, 0);
-    server.addRoom(room);
-    return MessageHandler::craftResponse("success", {{"message", "Room created successfully"}, {"room_id", room.id}});
+    // Create room and add to EntityManager
+    auto room = make_unique<Room>(
+        entityManager.getNextRoomId(),
+        playerId,
+        nowTimeT,
+        max_players,
+        max_spectators,
+        RoomStatus::WAITING
+    );
+
+    RoomParticipant participant(room->id, RoomParticipantStatus::PLAYER, playerId, false);
+    room->addRoomParticipant(move(participant));
+
+    int roomId = room->id;
+    entityManager.addRoom(move(room));
+
+    return MessageHandler::craftResponse("success", {
+        {"message", "Room created successfully"},
+        {"room_id", roomId}
+    });
 }
 
-nlohmann::json Player::joinRoom(int room_id, RoomParticipantStatus participant_type, Server& server) {
-    Room joiningRoom = server.getRoomById(room_id);
-    if (joiningRoom.status != RoomStatus::WAITING) {
-        return MessageHandler::craftResponse("error", {{"message", "Room with id: " + to_string(room_id) + "does not have WAITING state"}});
-    }else{
-        if (participant_type == RoomParticipantStatus::PLAYER) {
-            RoomParticipant participant(room_id, RoomParticipantStatus::PLAYER, this->id, false);
-            joiningRoom.addRoomParticipant(participant);
-            return MessageHandler::craftResponse("success", {{"message", "Player joined the room as Player role successfully"}, {"room_id", room_id}});
-        } else if (participant_type == RoomParticipantStatus::PLAYER_SPECTATOR) {
-            RoomParticipant participant(room_id, RoomParticipantStatus::PLAYER_SPECTATOR, this->id, false);
-            joiningRoom.addRoomParticipant(participant);
-            return MessageHandler::craftResponse("success", {{"message", "Player joined the room as Player Spectator role successfully"}, {"room_id", room_id}});   
-        } else {
-            return MessageHandler::craftResponse("error", {{"message", "Invalid participant type"}});
+nlohmann::json PlayerService::joinRoom(int playerId, int roomId, RoomParticipantStatus participant_type) {
+    // Get player and room from EntityManager
+    auto* player = entityManager.getPlayerById(playerId);
+    auto* room = entityManager.getRoomById(roomId);
+
+    if (!player || !room) {
+        return MessageHandler::craftResponse("error", {
+            {"message", "Player or room not found"}
+        });
+    }
+
+    if (room->status != RoomStatus::WAITING) {
+        return MessageHandler::craftResponse("error", {
+            {"message", "Room is not in WAITING state"}
+        });
+    }
+
+    // Check capacity based on participant type
+    if (participant_type == RoomParticipantStatus::PLAYER && 
+        room->current_players >= room->max_players) {
+        return MessageHandler::craftResponse("error", {
+            {"message", "Room is full"}
+        });
+    }
+
+    if (participant_type == RoomParticipantStatus::PLAYER_SPECTATOR && 
+        room->current_spectators >= room->max_spectators) {
+        return MessageHandler::craftResponse("error", {
+            {"message", "Room spectator slots are full"}
+        });
+    }
+
+    // Add participant to room
+    RoomParticipant participant(roomId, participant_type, playerId, false);
+    auto result = room->addRoomParticipant(move(participant));
+
+    return MessageHandler::craftResponse("success", {
+        {"message", "Joined room successfully"},
+        {"room_id", roomId}
+    });
+}
+
+nlohmann::json PlayerService::viewRoomList() {
+    const auto& rooms = entityManager.getAllRooms();
+    nlohmann::json roomsJson = nlohmann::json::array();
+
+    for (const auto& room : rooms) {
+        if (room->status == RoomStatus::WAITING) {
+            roomsJson.push_back(room->toJson());
         }
     }
+
+    return MessageHandler::craftResponse("success", {{"rooms", roomsJson}});
 }
 
+void PlayerService::updatePlayerSocket(int playerId, int socketFd) {
+    //DO SOMETHING HERE
+}

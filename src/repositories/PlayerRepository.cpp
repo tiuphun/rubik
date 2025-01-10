@@ -3,6 +3,7 @@
 #include "../models/header/Player.h"
 #include <iostream>
 
+using namespace std;
 std::vector<Player> PlayerRepository::getAllPlayers() {
     std::vector<Player> players;
     const char* sql = Query::SELECT_ALL_PLAYER;
@@ -60,5 +61,33 @@ Player PlayerRepository::createPlayerFromStmt(sqlite3_stmt* stmt) {
     time_t ban_date = sqlite3_column_int64(stmt, 9);
     int ban_by = sqlite3_column_int(stmt, 10);
 
-    return Player(id, username, password_hash, join_date, total_games, wins, best_time, avg_time, status, ban_date, ban_by, socket_fd);
+    return Player(id, username, password_hash, join_date, total_games, wins, best_time, avg_time, status, ban_date, ban_by, -1);
 }
+
+/**
+ * Function to add a player to the database
+ * @return true if success, false if fail
+ */
+bool PlayerRepository::registerPlayer(const string& username, const string& password_hash ){
+    const char* sql = Query::INSERT_PLAYER;
+    sqlite3_stmt* stmt = nullptr;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        cerr << "Error: Failed to prepare statement to check if username is taken: " 
+             << sqlite3_errmsg(db) << endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, password_hash.c_str(), -1, SQLITE_STATIC);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+    return true;
+}
+

@@ -23,6 +23,9 @@ public:
     const vector<unique_ptr<Admin>>& getAllAdmins() const;
     const vector<unique_ptr<Room>>& getAllRooms() const;
 
+    int getNextRoomId() { return roomIdCounter++; }
+    int getNextGameSessionId() { return gameSessionIdCounter++; }
+
     void removePlayer(int id);
     void removeAdmin(int id);
     void removeRoom(int id);
@@ -31,6 +34,8 @@ private:
     vector<unique_ptr<Player>> players;
     vector<unique_ptr<Admin>> admins;
     vector<unique_ptr<Room>> rooms;
+    static int roomIdCounter;
+    static int gameSessionIdCounter;
 };
 
 #endif

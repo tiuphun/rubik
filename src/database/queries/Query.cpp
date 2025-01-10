@@ -155,8 +155,14 @@ const char* Query::CREATE_ADMIN_TABLE =
     "created_at DATETIME DEFAULT (datetime('now')),"
     "last_login DATETIME"
     ");";
+
 const char* Query::FIND_AUTH_USER = 
     "SELECT id, username, user_type, account_status FROM AuthUsers WHERE username = ? AND password_hash = ? LIMIT 1;";
+const char* Query::FIND_AUTH_USER_BY_NAME = 
+    "SELECT id FROM AuthUsers WHERE username = ? LIMIT 1;";
+
+const char* Query::FIND_AUTH_USER_BY_STATUS = 
+    "SELECT account_status FROM AuthUsers WHERE username = ? LIMIT 1;";
 
 const char* Query::INSERT_ADMIN = 
     "INSERT INTO Admin(id,username,password_hash) "

@@ -8,6 +8,8 @@ public:
 
     // Login
     static const char* FIND_AUTH_USER;
+    static const char* FIND_AUTH_USER_BY_NAME;
+    static const char* FIND_AUTH_USER_BY_STATUS;
 
     // Admin Queries
     static const char* CREATE_ADMIN_TABLE;

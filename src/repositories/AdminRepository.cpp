@@ -30,5 +30,5 @@ Admin AdminRepository::createAdminFromStmt(sqlite3_stmt* stmt) {
     time_t created_at = sqlite3_column_int64(stmt, 3);
     time_t last_login = sqlite3_column_int64(stmt, 4);
 
-    return Admin(id, username, password_hash, created_at, last_login, socket_fd);
+    return Admin(id, username, password_hash, created_at, last_login, -1);
 }

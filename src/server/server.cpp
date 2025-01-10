@@ -14,8 +14,6 @@ using namespace std;
 
 #define PORT 8080
 
-int Server::room_id_counter = 1;
-int Server::game_session_id_counter = 1;
 
 Server::Server(){
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
