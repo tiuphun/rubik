@@ -1,7 +1,7 @@
 #include "UserService.h"
 #include "../database/queries/Query.h"
 #include "../messages/MessageHandler.h"
-#include <../server/Server.h>
+#include "../models/header/EntityManager.h"
 #include "openssl/sha.h"
 #include <string>
 #include <string.h>
@@ -9,10 +9,11 @@
 
 using namespace std;
 
-UserService::UserService(PlayerRepository& playerRepo, AdminRepository& adminRepo, Server& server)
-    : playerRepo(playerRepo), adminRepo(adminRepo), server(server) {
-    db = server.getDb();
-}
+UserService::UserService(PlayerRepository& playerRepo, 
+                        AdminRepository& adminRepo,
+                        EntityManager& entityManager)
+    : playerRepo(playerRepo), adminRepo(adminRepo), 
+        entityManager(entityManager) {}
 
 json UserService::signUp(const string& username, const string& password) {
     // Hash the password
@@ -105,8 +106,22 @@ json UserService::signIn(const string& username, const string& password) {
                 
                 //SELECT THE PLAYER BY ID and then parse the data to the player object
                 Player player = playerRepo.getPlayerById(id);
-                //Add player to server PLAYER VECTOR
-                server.addPlayer(player);
+                //Create Player auto pointer
+                auto playerPtr = make_unique<Player>(
+                    player.id, 
+                    player.username, 
+                    player.password_hash, 
+                    player.join_date,
+                    player.total_games, 
+                    player.wins, 
+                    player.best_time, 
+                    player.avg_time, 
+                    player.status, 
+                    player.ban_date, 
+                    player.ban_by, 
+                    player.socket_fd
+                );
+                entityManager.addPlayer(move(playerPtr));
                 return MessageHandler::craftResponse("success", {{"message", "Player signed in successfully"}});
             }
         } else if (user_type == "ADMIN") {
@@ -130,8 +145,17 @@ json UserService::signIn(const string& username, const string& password) {
                 }
                 //SELECT THE ADMIN BY ID and then parse the data to the admin object
                 Admin admin = adminRepo.getAdminById(id);
-                //Add admin to server ADMIN VECTOR
-                server.addAdmin(admin);
+                //Add admin to EntityManager ADMIN VECTOR
+                auto adminPtr = make_unique<Admin>(
+                    admin.id, 
+                    admin.username, 
+                    admin.password_hash, 
+                    admin.created_at, 
+                    admin.last_login, 
+                    admin.socket_fd
+                );
+                entityManager.addAdmin(move(adminPtr));
+                
                 return MessageHandler::craftResponse("success", {{"message", "Admin signed in successfully"}});
             }
         }

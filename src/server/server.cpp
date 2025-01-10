@@ -47,13 +47,7 @@ Server::Server(){
         close(server_socket);
         exit(1);
     }
-    playerRepo = new PlayerRepository(db,-1, *this);
-    adminRepo = new AdminRepository(db,-1, *this);
     cout << "Database initialization successful!\n"; 
-}
-
-sqlite3* Server::getDb() {
-    return db;
 }
 
 void Server::handleClient(int client_socket) {
@@ -111,41 +105,4 @@ void Server::start() {
         }
         handleClient(client_socket);
     }
-}
-
-void Server::addPlayer(const Player& player) {
-    players.push_back(player);
-}
-
-void Server::addAdmin(const Admin& admin) {
-    admins.push_back(admin);
-}
-
-void Server::addRoom(const Room& room) {
-    rooms.push_back(room);
-}
-
-vector<Player>& Server::getPlayers() {
-    return players;
-}
-
-vector<Admin>& Server::getAdmins() {
-    return admins;
-}
-
-vector<Room>& Server::getRooms() {
-    return rooms;
-}
-
-Room Server::getRoomById(int room_id){
-    for (const Room& room: this->rooms)
-    {
-        if (room.id == room_id)
-        {
-            return room;
-        }
-        
-    }
-    throw runtime_error("Room with id:" + to_string(room_id) + " not found when Player trying to get room");   
-    
 }

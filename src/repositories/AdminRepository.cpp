@@ -4,7 +4,7 @@
 #include <iostream>
 
 Admin AdminRepository::getAdminById(int id) {
-    Admin admin; // Default initialization
+    Admin admin;
     const char* sql = Query::SELECT_ADMIN_BY_ID;
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
@@ -16,6 +16,8 @@ Admin AdminRepository::getAdminById(int id) {
     sqlite3_bind_int(stmt, 1, id);
     if (sqlite3_step(stmt) == SQLITE_ROW) {
         admin = createAdminFromStmt(stmt);
+    }else{
+        cerr << "Admin with id" << id << "not found" << endl;
     }
     sqlite3_finalize(stmt);
     return admin;
@@ -28,5 +30,5 @@ Admin AdminRepository::createAdminFromStmt(sqlite3_stmt* stmt) {
     time_t created_at = sqlite3_column_int64(stmt, 3);
     time_t last_login = sqlite3_column_int64(stmt, 4);
 
-    return Admin(id, username, password_hash, created_at, last_login, socket_fd,server);
+    return Admin(id, username, password_hash, created_at, last_login, socket_fd);
 }

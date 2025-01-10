@@ -10,8 +10,11 @@ public:
     AdminService(PlayerRepository& playerRepo)
         : playerRepo(playerRepo) {}
 
-    nlohmann::json banPlayer(int player_id, int admin_id);
-    nlohmann::json viewPlayerList();
+    nlohmann::json banPlayer(int player_id, AdminService &adminService);
+    nlohmann::json viewPlayerList(AdminService &adminService);
+    nlohmann::json viewRoomList();
+    nlohmann::json spectate(int game_session_id, int room_id);
+    nlohmann::json leaveGame();
 
 private:
     PlayerRepository& playerRepo;
