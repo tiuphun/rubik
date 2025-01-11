@@ -13,6 +13,8 @@ public:
     Player createPlayerFromStmt(sqlite3_stmt* stmt);
     std::vector<Player> getAllPlayers();
     Player getPlayerById(int id);
+    bool disconnectPlayerStatusUpdate(int id); //Gọi khi disconnect socket thông qua PlayerRepository -> Update vào db status inactive
+    bool connectPlayerStatusUpdate(int id); // Gọi hàm này trong PlayerRepository sau khi fetch player vào EntityManager
 
 private:
     sqlite3* db;

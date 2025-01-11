@@ -5,6 +5,7 @@
 #include "openssl/sha.h"
 #include <string>
 #include <string.h>
+#include <iostream>
 
 
 using namespace std;
@@ -62,18 +63,19 @@ json UserService::signIn(const string& username, const string& password) {
              //Make a playerPtr and add it to entityManager
              auto playerPtr = make_unique<Player>(player);
              entityManager.addPlayer(move(playerPtr));
+             if(playerRepo.connectPlayerStatusUpdate(player_id)){
+                cout << "Player with id: " << player_id << "has updated the status to ACTIVE";
+             }
+             
         }
        
     }else if(authResult->user_type == "ADMIN"){
-        if(authResult->account_status == "ACTIVE"){
-            return MessageHandler::craftResponse("error", {{"message", "Admin is online"}}); 
-        }else{
-            int admin_id = authResult->id;
-            Admin admin = adminRepo.getAdminById(admin_id);
+       
+        int admin_id = authResult->id;
+        Admin admin = adminRepo.getAdminById(admin_id);
 
-            //Make a adminPtr and add it to entityManager
-            auto adminPtr = make_unique<Admin>(admin);
-            entityManager.addAdmin(move(adminPtr));
-        }
+        //Make a adminPtr and add it to entityManager
+        auto adminPtr = make_unique<Admin>(admin);
+        entityManager.addAdmin(move(adminPtr));
     }
 }

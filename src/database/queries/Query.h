@@ -24,6 +24,8 @@ public:
     static const char* SELECT_ALL_PLAYER;
     static const char* SELECT_PLAYER_BY_USERNAME;
     static const char* SELECT_PLAYER_BY_ID;
+    static const char* UPDATE_PLAYER_STATUS_ACTIVE;
+    static const char* UPDATE_PLAYER_STATUS_INACTIVE;
 
     // Room Queries
     static const char* CREATE_ROOM_TABLE;

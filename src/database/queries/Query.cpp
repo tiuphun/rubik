@@ -207,6 +207,14 @@ const char* Query::SELECT_PLAYER_BY_USERNAME =
 const char* Query::SELECT_PLAYER_BY_ID =
     "SELECT * FROM Player WHERE id = ?;";
 
+const char* Query::UPDATE_PLAYER_STATUS_ACTIVE =
+    "UPDATE Player SET STATUS = 'ACTIVE' WHERE id = ?";
+
+const char* Query::UPDATE_PLAYER_STATUS_INACTIVE =
+    "UPDATE Player SET STATUS = 'INACTIVE' WHERE id = ?";
+
+
+
 // Room Queries
 const char* Query::CREATE_ROOM_TABLE = 
     "CREATE TABLE IF NOT EXISTS Room ("

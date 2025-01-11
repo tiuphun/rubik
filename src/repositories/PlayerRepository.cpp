@@ -90,4 +90,53 @@ bool PlayerRepository::registerPlayer(const string& username, const string& pass
     sqlite3_finalize(stmt);
     return true;
 }
+/**
+ * Function to update the STATUS field in the database
+ * Return true if the player has the status field updated, 
+ */
+bool PlayerRepository::connectPlayerStatusUpdate(int player_id){
+    const char* update_sql = Query::UPDATE_PLAYER_STATUS_ACTIVE;
+    sqlite3_stmt* stmt;
+
+    int rc = sqlite3_prepare_v2(db,update_sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_int(stmt,1,player_id);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        std::cerr << "Failed to update player status ACTIVE with id: "<< player_id << ". " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+    return sqlite3_changes(db) > 0;
+}
+
+bool PlayerRepository::disconnectPlayerStatusUpdate(int player_id){
+    const char* update_sql = Query::UPDATE_PLAYER_STATUS_INACTIVE;
+    sqlite3_stmt* stmt;
+
+    int rc = sqlite3_prepare_v2(db,update_sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_int(stmt,1,player_id);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        std::cerr << "Failed to update player status to INACTIVE with id: "<< player_id << ". " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+    return sqlite3_changes(db) > 0;
+}
 
