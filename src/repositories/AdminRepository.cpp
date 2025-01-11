@@ -32,3 +32,27 @@ Admin AdminRepository::createAdminFromStmt(sqlite3_stmt* stmt) {
 
     return Admin(id, username, password_hash, created_at, last_login, -1);
 }
+
+bool AdminRepository::updateAdminLastLogin(int admin_id) {
+    const char* sql = Query::UPDATE_ADMIN_LAST_LOGIN;
+    sqlite3_stmt* stmt;
+
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, "datetime('now')", -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 2, admin_id);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        std::cerr << "Failed to update admin last login: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+    return sqlite3_changes(db) > 0;
+}

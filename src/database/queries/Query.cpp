@@ -176,6 +176,9 @@ const char* Query::SELECT_ADMIN_BY_ID =
 
 const char* Query::BAN_PLAYER =
     "UPDATE Player SET status = 'BANNED', ban_by = ? WHERE id = ?;";
+
+const char* Query::UPDATE_ADMIN_LAST_LOGIN =
+    "UPDATE Admin SET last_login = ? WHERE id = ?;";
     
 // Player Queries
 const char* Query::CREATE_PLAYER_TABLE = 

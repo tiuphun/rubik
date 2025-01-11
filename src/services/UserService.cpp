@@ -65,6 +65,8 @@ json UserService::signIn(const string& username, const string& password) {
              entityManager.addPlayer(move(playerPtr));
              if(playerRepo.connectPlayerStatusUpdate(player_id)){
                 cout << "Player with id: " << player_id << "has updated the status to ACTIVE";
+             }else{
+                cerr << "Failed to update player ACTIVE status for player with id: " << player_id;
              }
              
         }
@@ -77,5 +79,11 @@ json UserService::signIn(const string& username, const string& password) {
         //Make a adminPtr and add it to entityManager
         auto adminPtr = make_unique<Admin>(admin);
         entityManager.addAdmin(move(adminPtr));
+
+        if(adminRepo.updateAdminLastLogin(admin_id)){
+            cout << "Admin with id: " << admin_id << "has updated last_login to datetime(now)";
+        }else{
+            cerr << "Failed to update last login for admin with id: " << admin_id;
+        }
     }
 }

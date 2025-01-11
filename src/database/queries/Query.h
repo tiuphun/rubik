@@ -17,6 +17,7 @@ public:
     static const char* SELECT_ALL_ADMIN;
     static const char* BAN_PLAYER;
     static const char* SELECT_ADMIN_BY_ID;
+    static const char* UPDATE_ADMIN_LAST_LOGIN;
 
     // Player Queries
     static const char* CREATE_PLAYER_TABLE;

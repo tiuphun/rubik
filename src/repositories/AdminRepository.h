@@ -12,7 +12,7 @@ public:
     AdminRepository(sqlite3* db) : db(db) {}
     Admin getAdminById(int id);
     Admin createAdminFromStmt(sqlite3_stmt* stmt);
-    
+    bool updateAdminLastLogin(int id);
 
 private:
     sqlite3* db;
