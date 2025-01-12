@@ -15,7 +15,7 @@ public:
     nlohmann::json viewRoomList();
     nlohmann::json spectate(int game_session_id, int room_id);
     nlohmann::json leaveGame();
-
+    void updateAdminSocket(int adminId, int socketFd);
 private:
     PlayerRepository& playerRepo;
 };

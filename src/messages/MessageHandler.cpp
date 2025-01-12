@@ -10,14 +10,14 @@ json MessageHandler::parseMessage(const std::string& message) {
     return json::parse(message);
 }
 
-json MessageHandler::handleMessage(const json& parsed_message, sqlite3* db) {
+json MessageHandler::handleMessage(const json& parsed_message, sqlite3* db, int client_socket) {
     std::string type = parsed_message["type"];
     json response_data;
 
     if (type == "SIGN_UP") {
         response_data = handleSignUp(parsed_message, db);
     } else if (type == "SIGN_IN") {
-        response_data = handleSignIn(parsed_message, db);
+        response_data = handleSignIn(parsed_message, db, client_socket);
     } else if (type == "VIEW_ROOMS") {
         response_data = handleViewRooms(parsed_message, db);
     } else if (type == "CREATE_ROOM") {
@@ -52,21 +52,26 @@ json MessageHandler::craftResponse(const std::string& status, const json& data) 
 json MessageHandler::handleSignUp(const json& parsed_message, sqlite3* db) {
     PlayerRepository playerRepo(db);
     AdminRepository adminRepo(db);
-    Server server;
-    UserService userService(playerRepo, adminRepo, server);
+    AuthRepository authRepo(db);
+    EntityManager entityManager;
+    UserService userService(playerRepo, adminRepo, authRepo, entityManager);
+
     std::string username = parsed_message["username"];
     std::string password = parsed_message["password"];
     return userService.signUp(username, password);
 }
 
-json MessageHandler::handleSignIn(const json& parsed_message, sqlite3* db) {
+json MessageHandler::handleSignIn(const json& parsed_message, sqlite3* db, int client_socket) {
     PlayerRepository playerRepo(db);
     AdminRepository adminRepo(db);
-    Server server;
-    UserService userService(playerRepo, adminRepo, server);
+    AuthRepository authRepo(db);
+    EntityManager entityManager;
+    UserService userService(playerRepo, adminRepo, authRepo, entityManager);
+
     std::string username = parsed_message["username"];
     std::string password = parsed_message["password"];
-    return userService.signIn(username, password);
+
+    return userService.signIn(username, password, client_socket);
 }
 
 // cả admin và player đều đang có hàm này

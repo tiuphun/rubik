@@ -57,3 +57,10 @@ nlohmann::json Admin::leaveGame(Server& server) {
     // Implement leave game logic
     return {{"status", "success"}, {"message", "Admin left the game"}};
 }
+
+void AdminService::updateAdminSocket(int adminId, int socketFd) {
+    auto* admin = entityManager.getAdminById(adminId);
+    if (admin) {
+        admin->socket_fd = socketFd;
+    }
+}

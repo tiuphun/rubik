@@ -13,9 +13,11 @@ using namespace std;
 UserService::UserService(PlayerRepository& playerRepo, 
                         AdminRepository& adminRepo,
                         AuthRepository& authRepo,
-                        EntityManager& entityManager)
+                        EntityManager& entityManager,
+                        PlayerService& playerService,
+                        AdminService& adminService)
     : playerRepo(playerRepo), adminRepo(adminRepo), authRepo(authRepo), 
-        entityManager(entityManager) {}
+        entityManager(entityManager), playerService(playerService), adminService(adminService) {}
 
 json UserService::signUp(const string& username, const string& password) {
     // Hash the password
@@ -36,7 +38,7 @@ json UserService::signUp(const string& username, const string& password) {
     }  
 }
 
-json UserService::signIn(const string& username, const string& password) {
+json UserService::signIn(const string& username, const string& password, int client_socket) {
     // Hash the password
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((unsigned char*)password.c_str(), password.length(), hash);
@@ -51,7 +53,7 @@ json UserService::signIn(const string& username, const string& password) {
         return MessageHandler::craftResponse("error", {{"message", "Wrong username or password"}}); 
     }
 
-    if(authResult->user_type == "PLAYER"){
+    if (authResult->user_type == "PLAYER"){
         if(authResult->account_status == "BANNED"){
             return MessageHandler::craftResponse("error", {{"message", "Player is banned!"}}); 
         }else if(authResult->account_status == "ACTIVE"){
@@ -68,10 +70,10 @@ json UserService::signIn(const string& username, const string& password) {
              }else{
                 cerr << "Failed to update player ACTIVE status for player with id: " << player_id;
              }
-             
+             playerService.updatePlayerSocket(authResult->id, client_socket); // update socket fd for player here
         }
        
-    }else if(authResult->user_type == "ADMIN"){
+    } else if (authResult->user_type == "ADMIN"){
        
         int admin_id = authResult->id;
         Admin admin = adminRepo.getAdminById(admin_id);
@@ -85,5 +87,6 @@ json UserService::signIn(const string& username, const string& password) {
         }else{
             cerr << "Failed to update last login for admin with id: " << admin_id;
         }
+        adminService.updateAdminSocket(authResult->id, client_socket); // update socket fd for admin here
     }
 }

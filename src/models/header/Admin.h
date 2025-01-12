@@ -30,7 +30,7 @@ public:
         , last_login(0)
         , socket_fd(-1) {}
     Admin(int id, const string& username, const string& password_hash, time_t created_at, time_t last_login,int socket_fd)
-        : id(id), username(username), password_hash(password_hash), created_at(created_at), last_login(last_login), socket_fd(-1) {}
+        : id(id), username(username), password_hash(password_hash), created_at(created_at), last_login(last_login), socket_fd(socket_fd) {}
 
     /*
     Admin& operator=(const Admin& other) {

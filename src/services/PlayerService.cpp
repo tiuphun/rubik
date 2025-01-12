@@ -97,5 +97,8 @@ nlohmann::json PlayerService::viewRoomList() {
 }
 
 void PlayerService::updatePlayerSocket(int playerId, int socketFd) {
-    //DO SOMETHING HERE
+    auto* player = entityManager.getPlayerById(playerId);
+    if (player) {
+        player->socket_fd = socketFd;
+    }
 }

@@ -24,7 +24,7 @@ public:
         , entityManager(entityManager){}
 
     json signUp(const string& username, const string& password);
-    json signIn(const string& username, const string& password);
+    json signIn(const string& username, const string& password, int client_socket);
 
 private:
     PlayerRepository& playerRepo;
