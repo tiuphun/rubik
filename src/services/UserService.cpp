@@ -2,7 +2,7 @@
 #include "../database/queries/Query.h"
 #include "../messages/MessageHandler.h"
 #include "../models/header/EntityManager.h"
-#include "openssl/sha.h"
+#include "../include/openssl/sha.h"
 #include <string>
 #include <string.h>
 #include <iostream>
@@ -10,14 +10,8 @@
 
 using namespace std;
 
-UserService::UserService(PlayerRepository& playerRepo, 
-                        AdminRepository& adminRepo,
-                        AuthRepository& authRepo,
-                        EntityManager& entityManager)
-    : playerRepo(playerRepo), adminRepo(adminRepo), authRepo(authRepo), 
-        entityManager(entityManager) {}
 
-json UserService::signUp(const string& username, const string& password) {
+nlohmann::json UserService::signUp(const string& username, const string& password) {
     // Hash the password
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((unsigned char*)password.c_str(), password.length(), hash);
@@ -36,7 +30,7 @@ json UserService::signUp(const string& username, const string& password) {
     }  
 }
 
-json UserService::signIn(const string& username, const string& password) {
+nlohmann::json UserService::signIn(const string& username, const string& password) {
     // Hash the password
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((unsigned char*)password.c_str(), password.length(), hash);
@@ -62,13 +56,13 @@ json UserService::signIn(const string& username, const string& password) {
              Player player = playerRepo.getPlayerById(player_id);
              //Make a playerPtr and add it to entityManager
              auto playerPtr = make_unique<Player>(player);
-             entityManager.addPlayer(move(playerPtr));
+             entityManager.addPlayer(std::move(playerPtr));
              if(playerRepo.connectPlayerStatusUpdate(player_id)){
                 cout << "Player with id: " << player_id << "has updated the status to ACTIVE";
              }else{
                 cerr << "Failed to update player ACTIVE status for player with id: " << player_id;
              }
-             
+             return MessageHandler::craftResponse("success", {{"message", player_id}}); 
         }
        
     }else if(authResult->user_type == "ADMIN"){
@@ -78,12 +72,14 @@ json UserService::signIn(const string& username, const string& password) {
 
         //Make a adminPtr and add it to entityManager
         auto adminPtr = make_unique<Admin>(admin);
-        entityManager.addAdmin(move(adminPtr));
+        entityManager.addAdmin(std::move(adminPtr));
 
         if(adminRepo.updateAdminLastLogin(admin_id)){
             cout << "Admin with id: " << admin_id << "has updated last_login to datetime(now)";
         }else{
             cerr << "Failed to update last login for admin with id: " << admin_id;
         }
+
+        return MessageHandler::craftResponse("success", {{"message", admin_id}}); 
     }
 }

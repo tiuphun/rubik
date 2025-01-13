@@ -16,10 +16,12 @@ public:
     nlohmann::json addParticipant(int roomId, int playerId, RoomParticipantStatus type);
     nlohmann::json removeParticipant(int roomId, int participantId);
     nlohmann::json getRoomDetails(int roomId);
+    nlohmann::json toJson(int roomId) const;
+    bool hasParticipant(int roomId, int participant_id);
     
     // Room state checks
     bool isRoomFull(const Room* room, RoomParticipantStatus type) const;
-    bool isPlayerInRoom(int roomId, int playerId) const;
+    //bool isPlayerInRoom(int roomId, int playerId) const;
     bool canStartGame(const Room* room, int playerId) const;
 
 private:

@@ -15,7 +15,6 @@ SRCS = $(wildcard $(SRC_DIR)/main/*.cpp) \
 	$(wildcard $(SRC_DIR)/database/functions/*.cpp) \
        $(wildcard $(SRC_DIR)/models/entities/*.cpp) \
        $(wildcard $(SRC_DIR)/services/*.cpp) \
-       $(wildcard $(SRC_DIR)/messages/*.cpp) \
        $(wildcard $(SRC_DIR)/repositories/*.cpp) \
 
 # Object files

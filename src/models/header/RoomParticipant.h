@@ -12,7 +12,6 @@
 
 using namespace std;
 
-class Server;
 class RoomParticipant {
 public:
     int id;
@@ -31,9 +30,6 @@ public:
         using namespace std::chrono;
         return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
     }
-    
-private:
-    sqlite3* db;
 
     
 };

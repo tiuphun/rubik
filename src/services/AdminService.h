@@ -1,23 +1,37 @@
 #ifndef ADMINSERVICE_H
 #define ADMINSERVICE_H
 
+#include "../repositories/AdminRepository.h"
 #include "../repositories/PlayerRepository.h"
-#include "../models/header/Admin.h"
-#include <sqlite3.h>
+#include "../models/header/EntityManager.h"
+#include "../models/header/GameSession.h"
+#include "../messages/MessageHandler.h"
+#include <nlohmann/json.hpp>
 
 class AdminService {
 public:
-    AdminService(PlayerRepository& playerRepo)
-        : playerRepo(playerRepo) {}
+    AdminService(AdminRepository& adminRepo, 
+                PlayerRepository& playerRepo,
+                EntityManager& entityManager)
+        : adminRepo(adminRepo)
+        , playerRepo(playerRepo)
+        , entityManager(entityManager) {}
 
-    nlohmann::json banPlayer(int player_id, AdminService &adminService);
-    nlohmann::json viewPlayerList(AdminService &adminService);
+    // Entity operations
+    nlohmann::json banPlayer(int playerId, int adminId);
+    nlohmann::json viewPlayerList();
     nlohmann::json viewRoomList();
-    nlohmann::json spectate(int game_session_id, int room_id);
-    nlohmann::json leaveGame();
+    nlohmann::json spectate(int gameSessionId, int roomId);
+    nlohmann::json leaveGame(int adminId);
+
+    // Admin management
+    bool updateAdminSocket(int adminId, int socketFd);
+    bool disconnectAdmin(int adminId);
 
 private:
+    AdminRepository& adminRepo;
     PlayerRepository& playerRepo;
+    EntityManager& entityManager;
 };
 
 #endif // ADMINSERVICE_H

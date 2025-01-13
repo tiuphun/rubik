@@ -1,6 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include "../models/header/EntityManager.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -10,12 +11,11 @@
 #include <vector>
 #include "../repositories/AdminRepository.h"
 #include "../repositories/PlayerRepository.h"
-#include "../models/header/EntityManager.h"
+
 
 #define PORT 8080
 
 using namespace std;
-
 class Server {
 public:
     Server();                     

@@ -2,7 +2,7 @@
 #define PLAYERREPOSITORY_H
 
 #include <vector>
-#include "Player.h"
+#include "../models/header/Player.h"
 #include "Const.h"
 #include <sqlite3.h>
 
@@ -15,7 +15,7 @@ public:
     Player getPlayerById(int id);
     bool disconnectPlayerStatusUpdate(int id); //Gọi khi disconnect socket thông qua PlayerRepository -> Update vào db status inactive
     bool connectPlayerStatusUpdate(int id); // Gọi hàm này trong PlayerRepository sau khi fetch player vào EntityManager
-
+    sqlite3* getDb() const { return db; }
 private:
     sqlite3* db;
 };

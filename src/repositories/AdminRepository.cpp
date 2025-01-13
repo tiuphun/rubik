@@ -56,3 +56,27 @@ bool AdminRepository::updateAdminLastLogin(int admin_id) {
     sqlite3_finalize(stmt);
     return sqlite3_changes(db) > 0;
 }
+
+bool AdminRepository::banPlayer(int playerId, int adminId) {
+    const char* sql = Query::BAN_PLAYER;
+    sqlite3_stmt* stmt;
+
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Failed to prepare ban player statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_int(stmt, 1, adminId);
+    sqlite3_bind_int(stmt, 2, playerId);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        std::cerr << "Failed to ban player: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+    return sqlite3_changes(db) > 0;
+}

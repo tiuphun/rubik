@@ -15,7 +15,6 @@ public:
     nlohmann::json leaveRoom(int participantId, int roomId);
 private:
     EntityManager& entityManager;
-    bool isValidParticipant(int participantId, int roomId) const;
 };
 
 #endif

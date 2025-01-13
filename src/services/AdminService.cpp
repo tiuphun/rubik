@@ -1,59 +1,80 @@
 #include "AdminService.h"
 #include "../database/queries/Query.h"
 #include <iostream>
+#include "../messages/MessageHandler.h"
 
 using namespace std;
 
-nlohmann::json AdminService::banPlayer(int player_id, int admin_id) {
-    const char* sql = Query::BAN_PLAYER;
-    sqlite3_stmt* stmt;
-    int rc = sqlite3_prepare_v2(playerRepo.getDb(), sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK) {
-        cerr << "Failed to prepare statement: " << sqlite3_errmsg(playerRepo.getDb()) << endl;
-        return {{"status", "error"}, {"message", "Failed to prepare statement"}};
-    }
-
-    sqlite3_bind_int(stmt, 1, admin_id);
-    sqlite3_bind_int(stmt, 2, player_id);
-
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE) {
-        cerr << "Failed to execute statement: " << sqlite3_errmsg(playerRepo.getDb()) << endl;
-        sqlite3_finalize(stmt);
-        return {{"status", "error"}, {"message", "Failed to execute statement"}};
-    }
-
-    sqlite3_finalize(stmt);
-    return {{"status", "success"}, {"message", "Player banned successfully"}};
-}
-
 nlohmann::json AdminService::viewPlayerList() {
-    return playerRepo.getAllPlayers();
+    std::vector<Player> players = playerRepo.getAllPlayers();
+    //Construct player json from database here.
+    return MessageHandler::craftResponse({"success"}, {"message", "PLAYER LIST HERE"});
 }
 
-nlohmann::json Admin::banPlayer(int player_id, AdminService& adminService) {
-    return adminService.banPlayer(player_id, this->id);
-}
+nlohmann::json AdminService::banPlayer(int player_id,int admin_id) {
+    Player *player = entityManager.getPlayerById(player_id);
+    player->status = PlayerStatus::BANNED;
+    player->ban_by = admin_id;
 
-nlohmann::json Admin::viewPlayerList(AdminService& adminService) {
-    return adminService.viewPlayerList();
-}
-
-nlohmann::json Admin::viewRoomList(Server& server) {
-    vector<Room> rooms = server.getRooms();
-    nlohmann::json rooms_json = nlohmann::json::array();
-    for (const auto& room : rooms) {
-        rooms_json.push_back(room.toJson());
+    bool ban_ok = adminRepo.banPlayer(player_id, admin_id);
+    if(ban_ok){
+        return MessageHandler::craftResponse({"success"}, {"message", "Player banned successfully"});
+    }else{
+        return MessageHandler::craftResponse({"error"}, {"message", "Failed to update ban status to db"});
     }
-    return MessageHandler::craftResponse("success", {{"rooms", rooms_json}});
 }
 
-nlohmann::json Admin::spectate(int game_session_id, int room_id, Server& server) {
-    // Implement spectate logic
-    return {{"status", "success"}, {"message", "Spectating game session"}};
+nlohmann::json AdminService::viewRoomList() {
+    const auto& rooms = entityManager.getAllRooms();
+    nlohmann::json roomsJson = nlohmann::json::array();
+
+    for (const auto& room : rooms) {
+        if (room->status == RoomStatus::WAITING) {
+            // Create room info JSON
+            nlohmann::json roomInfo = {
+                {"id", room->id},
+                {"created_by", room->created_by},
+                {"created_at", room->created_at},
+                {"max_players", room->max_players},
+                {"max_spectators", room->max_spectators},
+                {"current_players", room->current_players},
+                {"current_spectators", room->current_spectators},
+                {"status", room->status}
+            };
+            
+            roomsJson.push_back(roomInfo);
+        }
+    }
+
+    return MessageHandler::craftResponse("success", {
+        {"rooms", roomsJson}
+    });
 }
 
-nlohmann::json Admin::leaveGame(Server& server) {
-    // Implement leave game logic
-    return {{"status", "success"}, {"message", "Admin left the game"}};
+nlohmann::json AdminService::spectate(int game_session_id, int room_id) {
+    GameSession *gs = entityManager.getGameSessionbyId(game_session_id);
+    if(gs){
+        //CRAFT GAME SESSION DETAILS HERE
+        return MessageHandler::craftResponse("success","GAMESESSION");
+    }else{
+        return MessageHandler::craftResponse("error","Cannot spectate the game");
+    }
+} 
+
+nlohmann::json AdminService::leaveGame(int admin_id) {
+    //DISCONNECT Admin Socket HERE
+    entityManager.removeAdmin(admin_id);
+    cout << "Admin with id:" << admin_id << "left the game";
+    return MessageHandler::craftResponse("success","Admin left the game");
+}
+
+bool AdminService::updateAdminSocket(int adminId, int socketFd) {
+    //UPDATE Admin Socket Here and returns the isSuccessful boolean result
+    bool isSuccessful = true;
+    if(isSuccessful){
+        cout << "Admin with id:" << adminId << "has been given a socket";
+    }else{
+        cout << "Failed to give socket to admin with id:" << adminId;
+    }
+    return true; //MODIFY IT TO CHECK IF THE SOCKET IS ASSIGNED SUCCESSFULLY
 }

@@ -26,14 +26,23 @@ nlohmann::json PlayerService::createRoom(int playerId, int max_players, int max_
         nowTimeT,
         max_players,
         max_spectators,
-        RoomStatus::WAITING
+        RoomStatus::WAITING,
+        1,
+        0
     );
 
-    RoomParticipant participant(room->id, RoomParticipantStatus::PLAYER, playerId, false);
-    room->addRoomParticipant(move(participant));
-
     int roomId = room->id;
-    entityManager.addRoom(move(room));
+    entityManager.addRoom(std::move(room));
+    // New player is also the new RoomParticipant
+    auto participant = make_unique<RoomParticipant>(
+        roomId,
+        RoomParticipantStatus::PLAYER,
+        playerId,
+        false
+    );
+
+    entityManager.addRoomParticipant(std::move(participant));
+   
 
     return MessageHandler::craftResponse("success", {
         {"message", "Room created successfully"},
@@ -74,8 +83,19 @@ nlohmann::json PlayerService::joinRoom(int playerId, int roomId, RoomParticipant
     }
 
     // Add participant to room
-    RoomParticipant participant(roomId, participant_type, playerId, false);
-    auto result = room->addRoomParticipant(move(participant));
+    auto participant = make_unique<RoomParticipant>(
+        roomId,
+        participant_type,
+        playerId,
+        false
+    );
+
+    entityManager.addRoomParticipant(std::move(participant));
+    if (participant_type == RoomParticipantStatus::PLAYER) {
+        room->current_players++;
+    } else {
+        room->current_spectators++;
+    }
 
     return MessageHandler::craftResponse("success", {
         {"message", "Joined room successfully"},
@@ -89,11 +109,25 @@ nlohmann::json PlayerService::viewRoomList() {
 
     for (const auto& room : rooms) {
         if (room->status == RoomStatus::WAITING) {
-            roomsJson.push_back(room->toJson());
+            // Create room info JSON
+            nlohmann::json roomInfo = {
+                {"id", room->id},
+                {"created_by", room->created_by},
+                {"created_at", room->created_at},
+                {"max_players", room->max_players},
+                {"max_spectators", room->max_spectators},
+                {"current_players", room->current_players},
+                {"current_spectators", room->current_spectators},
+                {"status", room->status}
+            };
+            
+            roomsJson.push_back(roomInfo);
         }
     }
 
-    return MessageHandler::craftResponse("success", {{"rooms", roomsJson}});
+    return MessageHandler::craftResponse("success", {
+        {"rooms", roomsJson}
+    });
 }
 
 void PlayerService::updatePlayerSocket(int playerId, int socketFd) {
