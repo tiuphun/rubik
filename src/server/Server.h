@@ -11,6 +11,7 @@
 #include <vector>
 #include "../repositories/AdminRepository.h"
 #include "../repositories/PlayerRepository.h"
+#include "../messages/MessageHandler.h"
 
 
 #define PORT 8080
@@ -28,10 +29,14 @@ public:
     } 
 
 private:
-    unique_ptr<EntityManager> entityManager;
     int server_socket; 
     sqlite3 *db;
     const char* db_path = "/Volumes/DATA/repository/rubikServer/rubik/src/database/migration/Rubik.db";
+    std::unique_ptr<EntityManager> entityManager;
+    std::unique_ptr<AdminRepository> adminRepo;
+    std::unique_ptr<PlayerRepository> playerRepo; 
+    std::unique_ptr<AuthRepository> authRepo;
+    std::unique_ptr<MessageHandler> messageHandler;
 
 };
 

@@ -7,6 +7,8 @@
 #include "../services/UserService.h"
 #include "../services/PlayerService.h"
 #include "../services/AdminService.h"
+#include "../services/GameService.h"
+#include "../services/RoomService.h"
 #include "../repositories/AuthRepository.h"
 #include "../repositories/PlayerRepository.h"
 #include "../repositories/AdminRepository.h"
@@ -16,23 +18,32 @@ using json = nlohmann::json;
 
 class MessageHandler {
 public:
-    MessageHandler(sqlite3* db)
-        : authRepo(db), playerRepo(db), adminRepo(db), entityManager(),
-          userService(playerRepo, adminRepo, authRepo, entityManager),
-          playerService(entityManager, playerRepo),
-          adminService(playerRepo) {}
+     MessageHandler(sqlite3* db) 
+        : entityManager(std::make_unique<EntityManager>())
+        , authRepo(db)
+        , playerRepo(db)
+        , adminRepo(db)
+        , userService(playerRepo, adminRepo, authRepo, *entityManager)
+        , playerService(*entityManager, playerRepo)
+        , adminService(adminRepo, playerRepo, *entityManager)
+        , roomService(*entityManager)
+        , gameService(*entityManager) {}
 
-     json parseMessage(const std::string& message);
-     json handleMessage(const json& parsed_message, sqlite3* db, int client_socket);
-     json craftResponse(const std::string& status, const json& data);
+    json parseMessage(const std::string& message);
+    json handleMessage(const json& parsed_message, sqlite3* db, int client_socket);
+    json craftResponse(const std::string& status, const json& data);
 private:
+    std::unique_ptr<EntityManager> entityManager;
     AuthRepository authRepo;
     PlayerRepository playerRepo;
     AdminRepository adminRepo;
-    EntityManager entityManager;
+    
+    // Services
     UserService userService;
-    PlayerService playerService;
-    AdminService adminService;    
+    PlayerService playerService; 
+    AdminService adminService;
+    RoomService roomService;
+    GameService gameService;
 
      json handleSignUp(const json& parsed_message, sqlite3* db);
      json handleSignIn(const json& parsed_message, sqlite3* db, int client_socket);

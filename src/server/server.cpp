@@ -8,7 +8,7 @@
 #include "../database/header/database.h"
 #include "../database/queries/Query.h"
 #include "Server.h"
-#include "../messages/MessageHandler.h"
+
 
 using namespace std;
 
@@ -67,8 +67,9 @@ void Server::handleClient(int client_socket) {
 }
 
 void Server::processMessage(const std::string& message, int client_socket) {
-    json parsed_message = MessageHandler::parseMessage(message);
-    json response = MessageHandler::handleMessage(parsed_message, db, client_socket);
+    nlohmann::json parsed_message = messageHandler->parseMessage(message);
+    //json response = MessageHandler::handleMessage(parsed_message, db, client_socket);
+    json response = messageHandler->handleMessage(parsed_message,db,client_socket);
     string response_str = response.dump();
     send(client_socket, response_str.c_str(), response_str.length(), 0);
 }

@@ -14,6 +14,8 @@
 using namespace std;
 class EntityManager {
 public:
+    EntityManager() = default;
+    
     void addPlayer(unique_ptr<Player> player);
     void addAdmin(unique_ptr<Admin> admin);
     void addRoom(unique_ptr<Room> room);
