@@ -69,12 +69,16 @@ nlohmann::json AdminService::leaveGame(int admin_id) {
 }
 
 bool AdminService::updateAdminSocket(int adminId, int socketFd) {
-    //UPDATE Admin Socket Here and returns the isSuccessful boolean result
-    bool isSuccessful = true;
-    if(isSuccessful){
-        cout << "Admin with id:" << adminId << "has been given a socket";
-    }else{
-        cout << "Failed to give socket to admin with id:" << adminId;
+    auto* admin = entityManager.getAdminById(adminId);
+    if (admin) {
+        admin->socket_fd = socketFd;
     }
-    return true; //MODIFY IT TO CHECK IF THE SOCKET IS ASSIGNED SUCCESSFULLY
+
+    if(admin->socket_fd == -1){
+        cout << "Failed to give socket to admin with id:" << adminId;
+        return false;
+    }else{
+        cout << "Admin with id:" << adminId << "has been given a socket";
+        return true;
+    }
 }

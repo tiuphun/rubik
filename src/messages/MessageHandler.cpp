@@ -10,14 +10,14 @@ json MessageHandler::parseMessage(const std::string& message) {
     return json::parse(message);
 }
 
-json MessageHandler::handleMessage(const json& parsed_message, sqlite3* db) {
+json MessageHandler::handleMessage(const json& parsed_message, sqlite3* db, int client_socket) {
     std::string type = parsed_message["type"];
     json response_data;
 
     if (type == "SIGN_UP") {
         response_data = handleSignUp(parsed_message, db);
     } else if (type == "SIGN_IN") {
-        response_data = handleSignIn(parsed_message, db);
+        response_data = handleSignIn(parsed_message, db, client_socket);
     } else if (type == "VIEW_ROOMS") {
         response_data = handleViewRooms(parsed_message, db);
     } else if (type == "CREATE_ROOM") {
@@ -26,8 +26,8 @@ json MessageHandler::handleMessage(const json& parsed_message, sqlite3* db) {
         response_data = handleJoinRoom(parsed_message, db);
     } else if (type == "LEAVE_ROOM") {
         response_data = handleLeaveRoom(parsed_message, db);
-    } else if (type == "READY") {
-        response_data = handleReady(parsed_message, db);
+    // } else if (type == "READY") {
+    //     response_data = handleReady(parsed_message, db);
     } else if (type == "START_GAME") {
         response_data = handleStartGame(parsed_message, db);
     } else if (type == "END_GAME") {
@@ -50,46 +50,36 @@ json MessageHandler::craftResponse(const std::string& status, const json& data) 
 
 
 json MessageHandler::handleSignUp(const json& parsed_message, sqlite3* db) {
-    PlayerRepository playerRepo(db);
-    AdminRepository adminRepo(db);
-    Server server;
-    UserService userService(playerRepo, adminRepo, server);
     std::string username = parsed_message["username"];
     std::string password = parsed_message["password"];
     return userService.signUp(username, password);
 }
 
-json MessageHandler::handleSignIn(const json& parsed_message, sqlite3* db) {
-    PlayerRepository playerRepo(db);
-    AdminRepository adminRepo(db);
-    Server server;
-    UserService userService(playerRepo, adminRepo, server);
+json MessageHandler::handleSignIn(const json& parsed_message, sqlite3* db, int client_socket) {
     std::string username = parsed_message["username"];
     std::string password = parsed_message["password"];
-    return userService.signIn(username, password);
+    return userService.signIn(username, password, client_socket);
 }
 
 // cả admin và player đều đang có hàm này
 json MessageHandler::handleViewRooms(const json& parsed_message, sqlite3* db) {
-    Server server;
-    Player player(server);
-    return player.viewRoomList(server);
+    PlayerService playerService(entityManager)
+    return playerService.viewRoomList();
 }
 
 json MessageHandler::handleCreateRoom(const json& parsed_message, sqlite3* db) {
-    Server server;
-    Player player(server);
+    int player_id = parsed_message["player_id"];
     int max_players = parsed_message["max_players"];
     int max_spectators = parsed_message["max_spectators"];
-    return player.createRoom(max_players, max_spectators, server);
+    return playerService.createRoom(player_id, max_players, max_spectators);
 }
 
 json MessageHandler::handleJoinRoom(const json& parsed_message, sqlite3* db) {
-    Server server;
-    Player player(server);
+    int player_id = parsed_message["player_id"];
     int room_id = parsed_message["room_id"];
-    std::string participant_type = parsed_message["participant_type"];
-    return player.joinRoom(room_id, RoomParticipantStatus::PLAYER, server);
+    std::string participant_type_str = parsed_message["participant_type"];
+    RoomParticipantStatus participant_type = stringToRoomParticipantStatus(participant_type_str);
+    return playerService.joinRoom(player_id, room_id, participant_type);
 }
 
 json MessageHandler::handleLeaveRoom(const json& parsed_message, sqlite3* db) {
@@ -102,14 +92,14 @@ json MessageHandler::handleLeaveRoom(const json& parsed_message, sqlite3* db) {
     return roomParticipant.leaveRoom(server);
 }
 
-json MessageHandler::handleReady(const json& parsed_message, sqlite3* db) {
-    int room_id = parsed_message["room_id"];
-    std::string participant_type = parsed_message["participant_type"];
-    int participant_id = parsed_message["participant_id"];
-    bool is_ready = parsed_message["is_ready"];
-    RoomParticipant roomParticipant(room_id, RoomParticipantStatus::PLAYER, participant_id, is_ready);
-    return roomParticipant.isReady();
-}
+// json MessageHandler::handleReady(const json& parsed_message, sqlite3* db) {
+//     int room_id = parsed_message["room_id"];
+//     std::string participant_type = parsed_message["participant_type"];
+//     int participant_id = parsed_message["participant_id"];
+//     bool is_ready = parsed_message["is_ready"];
+//     RoomParticipant roomParticipant(room_id, RoomParticipantStatus::PLAYER, participant_id, is_ready);
+//     return roomParticipant.isReady();
+// }
 
 json MessageHandler::handleStartGame(const json& parsed_message, sqlite3* db) {
     int player_id = parsed_message["player_id"];

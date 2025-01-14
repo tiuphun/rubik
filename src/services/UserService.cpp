@@ -45,7 +45,7 @@ nlohmann::json UserService::signIn(const string& username, const string& passwor
         return MessageHandler::craftResponse("error", {{"message", "Wrong username or password"}}); 
     }
 
-    if(authResult->user_type == "PLAYER"){
+    if (authResult->user_type == "PLAYER"){
         if(authResult->account_status == "BANNED"){
             return MessageHandler::craftResponse("error", {{"message", "Player is banned!"}}); 
         }else if(authResult->account_status == "ACTIVE"){
@@ -62,10 +62,11 @@ nlohmann::json UserService::signIn(const string& username, const string& passwor
              }else{
                 cerr << "Failed to update player ACTIVE status for player with id: " << player_id;
              }
-             return MessageHandler::craftResponse("success", {{"message", player_id}}); 
+             playerService.updatePlayerSocket(authResult->id, client_socket); // update socket fd for player herereturn MessageHandler::craftResponse("success", {{"message", player_id}}); 
+             return MessageHandler::craftResponse("success", {{"message", player_id}});
         }
        
-    }else if(authResult->user_type == "ADMIN"){
+    } else if (authResult->user_type == "ADMIN"){
        
         int admin_id = authResult->id;
         Admin admin = adminRepo.getAdminById(admin_id);
@@ -79,6 +80,7 @@ nlohmann::json UserService::signIn(const string& username, const string& passwor
         }else{
             cerr << "Failed to update last login for admin with id: " << admin_id;
         }
+        adminService.updateAdminSocket(authResult->id, client_socket); // update socket fd for admin here
 
         return MessageHandler::craftResponse("success", {{"message", admin_id}}); 
     }
