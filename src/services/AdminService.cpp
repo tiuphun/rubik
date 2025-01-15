@@ -1,14 +1,14 @@
 #include "AdminService.h"
 #include "../database/queries/Query.h"
 #include <iostream>
-#include "../messages/MessageHandler.h"
+#include "../messages/MessageCrafter.h"
 
 using namespace std;
 
 nlohmann::json AdminService::viewPlayerList() {
     std::vector<Player> players = playerRepo.getAllPlayers();
     //Construct player json from database here.
-    return MessageHandler::craftResponse({"success"}, {"message", "PLAYER LIST HERE"});
+    return MessageCrafter::craftResponse({"success"}, {"message", "PLAYER LIST HERE"});
 }
 
 nlohmann::json AdminService::banPlayer(int player_id,int admin_id) {
@@ -18,9 +18,9 @@ nlohmann::json AdminService::banPlayer(int player_id,int admin_id) {
 
     bool ban_ok = adminRepo.banPlayer(player_id, admin_id);
     if(ban_ok){
-        return MessageHandler::craftResponse({"success"}, {"message", "Player banned successfully"});
+        return MessageCrafter::craftResponse({"success"}, {"message", "Player banned successfully"});
     }else{
-        return MessageHandler::craftResponse({"error"}, {"message", "Failed to update ban status to db"});
+        return MessageCrafter::craftResponse({"error"}, {"message", "Failed to update ban status to db"});
     }
 }
 
@@ -46,7 +46,7 @@ nlohmann::json AdminService::viewRoomList() {
         }
     }
 
-    return MessageHandler::craftResponse("success", {
+    return MessageCrafter::craftResponse("success", {
         {"rooms", roomsJson}
     });
 }
@@ -55,9 +55,9 @@ nlohmann::json AdminService::spectate(int game_session_id, int room_id) {
     GameSession *gs = entityManager.getGameSessionbyId(game_session_id);
     if(gs){
         //CRAFT GAME SESSION DETAILS HERE
-        return MessageHandler::craftResponse("success","GAMESESSION");
+        return MessageCrafter::craftResponse("success","GAMESESSION");
     }else{
-        return MessageHandler::craftResponse("error","Cannot spectate the game");
+        return MessageCrafter::craftResponse("error","Cannot spectate the game");
     }
 } 
 
@@ -65,7 +65,7 @@ nlohmann::json AdminService::leaveGame(int admin_id) {
     //DISCONNECT Admin Socket HERE
     entityManager.removeAdmin(admin_id);
     cout << "Admin with id:" << admin_id << "left the game";
-    return MessageHandler::craftResponse("success","Admin left the game");
+    return MessageCrafter::craftResponse("success","Admin left the game");
 }
 
 bool AdminService::updateAdminSocket(int adminId, int socketFd) {

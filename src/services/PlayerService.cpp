@@ -1,6 +1,6 @@
 // PlayerService.cpp
 #include "PlayerService.h"
-#include "../messages/MessageHandler.h"
+#include "../messages/MessageCrafter.h"
 #include <chrono>
 #include "../models/header/RoomParticipant.h"
 #include "../models/header/Room.h"
@@ -13,7 +13,7 @@ nlohmann::json PlayerService::createRoom(int playerId, int max_players, int max_
     // Get player from entitymanager vector
     auto* player = entityManager.getPlayerById(playerId);
     if (!player) {
-        return MessageHandler::craftResponse("error", {{"message", "Player not found"}});
+        return MessageCrafter::craftResponse("error", {{"message", "Player not found"}});
     }
 
     auto now = system_clock::now();
@@ -44,7 +44,7 @@ nlohmann::json PlayerService::createRoom(int playerId, int max_players, int max_
     entityManager.addRoomParticipant(std::move(participant));
    
 
-    return MessageHandler::craftResponse("success", {
+    return MessageCrafter::craftResponse("success", {
         {"message", "Room created successfully"},
         {"room_id", roomId}
     });
@@ -56,13 +56,13 @@ nlohmann::json PlayerService::joinRoom(int playerId, int roomId, RoomParticipant
     auto* room = entityManager.getRoomById(roomId);
 
     if (!player || !room) {
-        return MessageHandler::craftResponse("error", {
+        return MessageCrafter::craftResponse("error", {
             {"message", "Player or room not found"}
         });
     }
 
     if (room->status != RoomStatus::WAITING) {
-        return MessageHandler::craftResponse("error", {
+        return MessageCrafter::craftResponse("error", {
             {"message", "Room is not in WAITING state"}
         });
     }
@@ -70,14 +70,14 @@ nlohmann::json PlayerService::joinRoom(int playerId, int roomId, RoomParticipant
     // Check capacity based on participant type
     if (participant_type == RoomParticipantStatus::PLAYER && 
         room->current_players >= room->max_players) {
-        return MessageHandler::craftResponse("error", {
+        return MessageCrafter::craftResponse("error", {
             {"message", "Room is full"}
         });
     }
 
     if (participant_type == RoomParticipantStatus::PLAYER_SPECTATOR && 
         room->current_spectators >= room->max_spectators) {
-        return MessageHandler::craftResponse("error", {
+        return MessageCrafter::craftResponse("error", {
             {"message", "Room spectator slots are full"}
         });
     }
@@ -97,7 +97,7 @@ nlohmann::json PlayerService::joinRoom(int playerId, int roomId, RoomParticipant
         room->current_spectators++;
     }
 
-    return MessageHandler::craftResponse("success", {
+    return MessageCrafter::craftResponse("success", {
         {"message", "Joined room successfully"},
         {"room_id", roomId}
     });
@@ -125,7 +125,7 @@ nlohmann::json PlayerService::viewRoomList() {
         }
     }
 
-    return MessageHandler::craftResponse("success", {
+    return MessageCrafter::craftResponse("success", {
         {"rooms", roomsJson}
     });
 }

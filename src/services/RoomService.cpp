@@ -1,5 +1,5 @@
 #include "RoomService.h"
-#include "../messages/MessageHandler.h"
+#include "../messages/MessageCrafter.h"
 #include <chrono>
 #include "GenCube.h"
 
@@ -9,12 +9,12 @@ using namespace std;
 nlohmann::json RoomService::startGameSession(int playerId, int roomId) {
     auto* room = entityManager.getRoomById(roomId);
     if (!room) {
-        return MessageHandler::craftResponse("error", {{"message", "Room not found"}});
+        return MessageCrafter::craftResponse("error", {{"message", "Room not found"}});
     }
 
     /*
     if (!isPlayerInRoom(roomId, playerId)) {
-        return MessageHandler::craftResponse("error", {{"message", "Player not in room"}});
+        return MessageCrafter::craftResponse("error", {{"message", "Player not in room"}});
     }
     */
     
@@ -36,7 +36,7 @@ nlohmann::json RoomService::startGameSession(int playerId, int roomId) {
     auto sessionJson = newSession->toJson();
     entityManager.addGameSession(std::move(newSession));
 
-    return MessageHandler::craftResponse("success", {
+    return MessageCrafter::craftResponse("success", {
         {"message", sessionJson}
     });
 }
@@ -44,12 +44,12 @@ nlohmann::json RoomService::startGameSession(int playerId, int roomId) {
 nlohmann::json RoomService::removeParticipant(int roomId, int participantId) {
     auto* room = entityManager.getRoomById(roomId);
     if (!room) {
-        return MessageHandler::craftResponse("error", {{"message", "Room not found"}});
+        return MessageCrafter::craftResponse("error", {{"message", "Room not found"}});
     }
 
     auto participant = entityManager.getRoomParticipantById(participantId);
     if(!participant){
-        return MessageHandler::craftResponse("error", {{"message", "Participant not found"}});
+        return MessageCrafter::craftResponse("error", {{"message", "Participant not found"}});
     }
 
     if(participant->participant_type == RoomParticipantStatus::PLAYER){
@@ -58,7 +58,7 @@ nlohmann::json RoomService::removeParticipant(int roomId, int participantId) {
         room->current_spectators--;
     }
     entityManager.removeRoomParticipant(participantId);
-    return MessageHandler::craftResponse("success", {{"message", "Participant removed"}});
+    return MessageCrafter::craftResponse("success", {{"message", "Participant removed"}});
 }
 
 std::string RoomService::initCubeState() {
@@ -67,7 +67,7 @@ std::string RoomService::initCubeState() {
     Cube cube_state = Random_Cube(output);
 
     if (output.length() <= 0) {
-        return MessageHandler::craftResponse("error", {{"message", "Cannot init cube"}});
+        return MessageCrafter::craftResponse("error", {{"message", "Cannot init cube"}});
     }
 
     std::string cube_state_string = "";
@@ -84,15 +84,15 @@ std::string RoomService::initCubeState() {
 nlohmann::json RoomService::addParticipant(int roomId, int playerId, RoomParticipantStatus type) {
     auto* room = entityManager.getRoomById(roomId);
     if (!room) {
-        return MessageHandler::craftResponse("error", {{"message", "Room not found"}});
+        return MessageCrafter::craftResponse("error", {{"message", "Room not found"}});
     }
 
     // Check capacity
     if (type == RoomParticipantStatus::PLAYER && room->current_players >= room->max_players) {
-        return MessageHandler::craftResponse("error", {{"message", "No player slots available"}});
+        return MessageCrafter::craftResponse("error", {{"message", "No player slots available"}});
     }
     if (type == RoomParticipantStatus::PLAYER_SPECTATOR && room->current_spectators >= room->max_spectators) {
-        return MessageHandler::craftResponse("error", {{"message", "No spectator slots available"}});
+        return MessageCrafter::craftResponse("error", {{"message", "No spectator slots available"}});
     }
 
     //Create & add participant
@@ -110,7 +110,7 @@ nlohmann::json RoomService::addParticipant(int roomId, int playerId, RoomPartici
         room->current_spectators++;
     }
 
-    return MessageHandler::craftResponse("success", {
+    return MessageCrafter::craftResponse("success", {
         {"message", "Participant added successfully"},
         {"room_id", roomId}
     });
@@ -126,16 +126,16 @@ bool RoomService::isRoomFull(const Room* room, RoomParticipantStatus type) const
 nlohmann::json RoomService::getRoomDetails(int roomId) {
     auto* room = entityManager.getRoomById(roomId);
     if (!room) {
-        return MessageHandler::craftResponse("error", {{"message", "Room not found"}});
+        return MessageCrafter::craftResponse("error", {{"message", "Room not found"}});
     }
-    return MessageHandler::craftResponse("success", {{"message", "Room to JSON Here"}});// change this.
+    return MessageCrafter::craftResponse("success", {{"message", "Room to JSON Here"}});// change this.
 }
 
 nlohmann::json RoomService::toJson(int roomId) const {
     // Get room
     auto* room = entityManager.getRoomById(roomId);
     if (!room) {
-        return MessageHandler::craftResponse("error", {{"message", "Room not found"}});
+        return MessageCrafter::craftResponse("error", {{"message", "Room not found"}});
     }
 
     // Get participants for this room
@@ -177,5 +177,5 @@ nlohmann::json RoomService::toJson(int roomId) const {
         {"game_sessions", gameSessionsJson}
     };
 
-    return MessageHandler::craftResponse("success", {{"room", roomJson}});
+    return MessageCrafter::craftResponse("success", {{"room", roomJson}});
 }

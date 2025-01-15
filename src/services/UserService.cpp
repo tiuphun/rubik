@@ -1,6 +1,6 @@
 #include "UserService.h"
 #include "../database/queries/Query.h"
-#include "../messages/MessageHandler.h"
+#include "../messages/MessageCrafter.h"
 #include "../models/header/EntityManager.h"
 #include "../include/openssl/sha.h"
 #include <string>
@@ -19,13 +19,13 @@ nlohmann::json UserService::signUp(const string& username, const string& passwor
 
     bool checkUsernameTaken = authRepo.isUsernameTaken(username);
     if(checkUsernameTaken){
-        return MessageHandler::craftResponse("error", {{"message", "Username is already taken"}});   
+        return MessageCrafter::craftResponse("error", {{"message", "Username is already taken"}});   
     }else{
         bool result = playerRepo.registerPlayer(username,password_hash);
         if(result){
-            return MessageHandler::craftResponse("success", {{"message", "Player created successfully"}});
+            return MessageCrafter::craftResponse("success", {{"message", "Player created successfully"}});
         }else{
-            return MessageHandler::craftResponse("error", {{"message", "Failed to create the player in the database"}});
+            return MessageCrafter::craftResponse("error", {{"message", "Failed to create the player in the database"}});
         }
     }  
 }
@@ -38,18 +38,18 @@ nlohmann::json UserService::signIn(const string& username, const string& passwor
 
     bool checkPlayerBanned = authRepo.isPlayerBanned(username);
     if(checkPlayerBanned){
-        return MessageHandler::craftResponse("error", {{"message", "Player is banned"}}); 
+        return MessageCrafter::craftResponse("error", {{"message", "Player is banned"}}); 
     }
     auto authResult = authRepo.validateCredentials(username, password_hash);
     if(!authResult){
-        return MessageHandler::craftResponse("error", {{"message", "Wrong username or password"}}); 
+        return MessageCrafter::craftResponse("error", {{"message", "Wrong username or password"}}); 
     }
 
     if (authResult->user_type == "PLAYER"){
         if(authResult->account_status == "BANNED"){
-            return MessageHandler::craftResponse("error", {{"message", "Player is banned!"}}); 
+            return MessageCrafter::craftResponse("error", {{"message", "Player is banned!"}}); 
         }else if(authResult->account_status == "ACTIVE"){
-            return MessageHandler::craftResponse("error", {{"message", "Player is online"}}); 
+            return MessageCrafter::craftResponse("error", {{"message", "Player is online"}}); 
         }else{
              //IF NOT BANNED or ACTIVE, find the player details, create a new player under EntityManager. Then update the status to the database
              int player_id = authResult->id;
@@ -62,8 +62,8 @@ nlohmann::json UserService::signIn(const string& username, const string& passwor
              }else{
                 cerr << "Failed to update player ACTIVE status for player with id: " << player_id;
              }
-             playerService.updatePlayerSocket(authResult->id, client_socket); // update socket fd for player herereturn MessageHandler::craftResponse("success", {{"message", player_id}}); 
-             return MessageHandler::craftResponse("success", {{"message", player_id}});
+             playerService.updatePlayerSocket(authResult->id, client_socket); // update socket fd for player herereturn MessageCrafter::craftResponse("success", {{"message", player_id}}); 
+             return MessageCrafter::craftResponse("success", {{"message", player_id}});
         }
        
     } else if (authResult->user_type == "ADMIN"){
@@ -82,6 +82,6 @@ nlohmann::json UserService::signIn(const string& username, const string& passwor
         }
         adminService.updateAdminSocket(authResult->id, client_socket); // update socket fd for admin here
 
-        return MessageHandler::craftResponse("success", {{"message", admin_id}}); 
+        return MessageCrafter::craftResponse("success", {{"message", admin_id}}); 
     }
 }

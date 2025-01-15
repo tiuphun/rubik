@@ -5,7 +5,7 @@
 #include "../models/header/EntityManager.h"
 #include "../models/header/Room.h"
 #include "../models/header/RoomParticipant.h"
-#include "../messages/MessageHandler.h"
+#include "../messages/MessageCrafter.h"
 
 class RoomParticipantService {
 public:

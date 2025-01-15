@@ -5,7 +5,7 @@
 #include "../repositories/PlayerRepository.h"
 #include "../models/header/EntityManager.h"
 #include "../models/header/GameSession.h"
-#include "../messages/MessageHandler.h"
+#include "../messages/MessageCrafter.h"
 #include <nlohmann/json.hpp>
 
 class AdminService {
