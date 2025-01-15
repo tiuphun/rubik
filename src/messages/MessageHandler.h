@@ -23,7 +23,7 @@ public:
         , authRepo(db)
         , playerRepo(db)
         , adminRepo(db)
-        , userService(playerRepo, adminRepo, authRepo, *entityManager)
+        , userService(userService)
         , playerService(*entityManager, playerRepo)
         , adminService(adminRepo, playerRepo, *entityManager)
         , roomService(*entityManager)
