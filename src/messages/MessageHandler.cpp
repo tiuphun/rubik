@@ -63,7 +63,7 @@ json MessageHandler::handleSignIn(const json& parsed_message, sqlite3* db, int c
 
 // cả admin và player đều đang có hàm này
 json MessageHandler::handleViewRooms(const json& parsed_message, sqlite3* db) {
-    playerService.viewRoomList();
+    return playerService.viewRoomList();
 }
 
 json MessageHandler::handleCreateRoom(const json& parsed_message, sqlite3* db) {
@@ -83,10 +83,9 @@ json MessageHandler::handleJoinRoom(const json& parsed_message, sqlite3* db) {
 
 json MessageHandler::handleLeaveRoom(const json& parsed_message, sqlite3* db) {
     int room_id = parsed_message["room_id"];
-    std::string participant_type = parsed_message["participant_type"];
     int participant_id = parsed_message["participant_id"];
-    bool is_ready = parsed_message["is_ready"];
-    roomService.removeParticipant(room_id,participant_id);
+    // bool is_ready = parsed_message["is_ready"];
+    return roomService.removeParticipant(room_id,participant_id);
 }
 
 // json MessageHandler::handleReady(const json& parsed_message, sqlite3* db) {
@@ -100,28 +99,28 @@ json MessageHandler::handleLeaveRoom(const json& parsed_message, sqlite3* db) {
 
 json MessageHandler::handleStartGame(const json& parsed_message, sqlite3* db) {
     int player_id = parsed_message["player_id"];
-    std::string initial_cube_state = parsed_message["initial_cube_state"];
+    // std::string initial_cube_state = parsed_message["initial_cube_state"];
     int room_id = parsed_message["room_id"];
-    int max_players = parsed_message["max_players"];
-    int max_spectators = parsed_message["max_spectators"];
-    std::string status = parsed_message["status"];
+    // int max_players = parsed_message["max_players"];
+    // int max_spectators = parsed_message["max_spectators"];
+    // std::string status = parsed_message["status"];
     return roomService.startGameSession(player_id, room_id);
 }
 
 json MessageHandler::handleEndGame(const json& parsed_message, sqlite3* db) {
     int player_id = parsed_message["player_id"];
     int game_session_id = parsed_message["game_session_id"];
-    int room_id = parsed_message["room_id"];
-    int total_moves = parsed_message["total_moves"];
-    int time_taken = parsed_message["time_taken"];
+    // int room_id = parsed_message["room_id"];
+    // int total_moves = parsed_message["total_moves"];
+    // int time_taken = parsed_message["time_taken"];
     
     return gameService.endGameSession(game_session_id, player_id);
 }
 
 json MessageHandler::handleViewUsers(const json& parsed_message, sqlite3* db) {
-    int admin_id = parsed_message["admin_id"];
+    // int admin_id = parsed_message["admin_id"];
     vector<Player> players = playerRepo.getAllPlayers();
-    //Craft json here
+    return playerService.returnPlayersJson(players);
 }
 
 json MessageHandler::handleBanPlayer(const json& parsed_message, sqlite3* db) {
@@ -132,7 +131,7 @@ json MessageHandler::handleBanPlayer(const json& parsed_message, sqlite3* db) {
 }
 
 json MessageHandler::handleSpectate(const json& parsed_message, sqlite3* db) {
-    int admin_id = parsed_message["admin_id"];
+    // int admin_id = parsed_message["admin_id"];
     int room_id = parsed_message["room_id"];
     int participant_id = parsed_message["participant_id"];
 

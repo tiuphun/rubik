@@ -136,3 +136,23 @@ void PlayerService::updatePlayerSocket(int playerId, int socketFd) {
         player->socket_fd = socketFd;
     }
 }
+
+nlohmann::json PlayerService::returnPlayersJson(std::vector<Player>& players) {
+    nlohmann::json playersJson = nlohmann::json::array();
+    for (const auto& player : players) {
+        nlohmann::json playerJson = {
+            {"id", player.id},
+            {"username", player.username},
+            {"join_date", player.join_date},
+            {"total_games", player.total_games},
+            {"wins", player.wins},
+            {"best_time", player.best_time},
+            {"avg_time", player.avg_time},
+            {"status", player.status},
+            {"ban_date", player.ban_date},
+            {"ban_by", player.ban_by}
+        };
+        playersJson.push_back(playerJson);
+    }
+    return playersJson;
+}

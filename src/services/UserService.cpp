@@ -1,7 +1,6 @@
 #include "UserService.h"
 #include "AdminService.h"
-// #include "AdminService.h"
-// #include "PlayerService.h"
+#include "PlayerService.h"
 #include "../database/queries/Query.h"
 #include "../messages/MessageCrafter.h"
 #include "../models/header/EntityManager.h"

@@ -19,6 +19,7 @@ public:
     nlohmann::json joinRoom(int playerId, int room_id, RoomParticipantStatus participant_type);
     nlohmann::json viewRoomList();
     void updatePlayerSocket(int playerId, int socketFd);
+    nlohmann::json returnPlayersJson(std::vector<Player>& players);
 
 private:
     EntityManager& entityManager;
