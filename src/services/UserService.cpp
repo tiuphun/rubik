@@ -1,4 +1,6 @@
 #include "UserService.h"
+// #include "AdminService.h"
+// #include "PlayerService.h"
 #include "../database/queries/Query.h"
 #include "../messages/MessageCrafter.h"
 #include "../models/header/EntityManager.h"
@@ -30,7 +32,7 @@ nlohmann::json UserService::signUp(const string& username, const string& passwor
     }  
 }
 
-nlohmann::json UserService::signIn(const string& username, const string& password) {
+nlohmann::json UserService::signIn(const string& username, const string& password, int client_socket) {
     // Hash the password
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((unsigned char*)password.c_str(), password.length(), hash);
@@ -41,10 +43,6 @@ nlohmann::json UserService::signIn(const string& username, const string& passwor
         return MessageCrafter::craftResponse("error", {{"message", "Player is banned"}}); 
     }
     auto authResult = authRepo.validateCredentials(username, password_hash);
-    if(!authResult){
-        return MessageCrafter::craftResponse("error", {{"message", "Wrong username or password"}}); 
-    }
-
     if (authResult->user_type == "PLAYER"){
         if(authResult->account_status == "BANNED"){
             return MessageCrafter::craftResponse("error", {{"message", "Player is banned!"}}); 
@@ -84,4 +82,5 @@ nlohmann::json UserService::signIn(const string& username, const string& passwor
 
         return MessageCrafter::craftResponse("success", {{"message", admin_id}}); 
     }
+    return MessageCrafter::craftResponse("error", {{"message", "Wrong username or password"}}); 
 }

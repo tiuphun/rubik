@@ -8,6 +8,8 @@
 #include "../repositories/AdminRepository.h"
 #include "../repositories/AuthRepository.h"
 #include "../models/header/EntityManager.h"
+#include "AdminService.h"
+#include "PlayerService.h"
 
 using json = nlohmann::json;
 using namespace std;
@@ -21,7 +23,9 @@ public:
         : playerRepo(playerRepo)
         , adminRepo(adminRepo)
         , authRepo(authRepo)
-        , entityManager(entityManager){}
+        , entityManager(entityManager) 
+        // , adminService(adminRepo, playerRepo, entityManager)
+        // , playerService(entityManager, playerRepo) {}
 
     json signUp(const string& username, const string& password);
     json signIn(const string& username, const string& password, int client_socket);
@@ -31,7 +35,8 @@ private:
     AdminRepository& adminRepo;
     AuthRepository& authRepo;
     EntityManager& entityManager;
-
+    // AdminService adminService;
+    // PlayerService playerService;
 };
 
 #endif
