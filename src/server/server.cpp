@@ -50,8 +50,8 @@ Server::Server(){
 
 void Server::handleClient(int client_socket) {
     char buffer[1024] = {0};
-    string welcome_msg = "Welcome to the Rubik Server! Send your JSON messages.\n";
-    send(client_socket, welcome_msg.c_str(), welcome_msg.length(), 0);
+    // string welcome_msg = "Welcome to the Rubik Server! Send your JSON messages.\n";
+    // send(client_socket, welcome_msg.c_str(), welcome_msg.length(), 0);
 
     while (true) {
         int bytes_read = read(client_socket, buffer, 1024);
@@ -62,15 +62,20 @@ void Server::handleClient(int client_socket) {
         }
 
         string message(buffer, bytes_read);
+        cout << "Received message: " << message << endl; // Debug print
         processMessage(message, client_socket);
     }
 }
 
 void Server::processMessage(const std::string& message, int client_socket) {
+    cout << "Processing message\n" << endl;
     nlohmann::json parsed_message = messageHandler->parseMessage(message);
+    cout << "Parsed message: " << parsed_message.dump() << endl; // Debug print
     //json response = MessageHandler::handleMessage(parsed_message, db, client_socket);
     json response = messageHandler->handleMessage(parsed_message,db,client_socket);
+    cout << "Handled message\n" << endl;
     string response_str = response.dump();
+    cout << "Request response: " << response_str << endl; // Debug print
     send(client_socket, response_str.c_str(), response_str.length(), 0);
 }
 
