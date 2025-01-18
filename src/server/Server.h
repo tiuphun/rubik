@@ -32,11 +32,11 @@ private:
     int server_socket; 
     sqlite3 *db;
     const char* db_path = "/Users/tieuphuong/rubik/src/database/migration/Rubik.db";
-    std::unique_ptr<EntityManager> entityManager;
-    std::unique_ptr<AdminRepository> adminRepo;
-    std::unique_ptr<PlayerRepository> playerRepo; 
-    std::unique_ptr<AuthRepository> authRepo;
-    std::unique_ptr<MessageHandler> messageHandler;
+    // std::unique_ptr<EntityManager> entityManager;
+    // std::unique_ptr<AdminRepository> adminRepo;
+    // std::unique_ptr<PlayerRepository> playerRepo; 
+    // std::unique_ptr<AuthRepository> authRepo;
+    std::unique_ptr<MessageHandler> messageHandler = std::make_unique<MessageHandler>(db);
 
 };
 

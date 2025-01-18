@@ -5,6 +5,7 @@
 #include "../models/header/Room.h"
 #include "../models/header/RoomParticipant.h"
 #include "../models/header/GameSession.h"
+#include <iostream>
 
 using namespace std;
 
@@ -17,6 +18,29 @@ json MessageHandler::handleMessage(const json& parsed_message, sqlite3* db, int 
     std::string data = parsed_message["data"].dump();
     printf("Message type: %s\n", type.c_str());
     printf("Message data: %s\n", data.c_str());
+
+    printf("Bat dau doan cua Phong\n");
+    // Print initialization status of member variables
+    cout << "EntityManager initialized: " << (entityManager) << endl;
+    cout << "AuthRepo initialized: " << (&authRepo) << endl;
+    cout << "PlayerRepo initialized: " << (&playerRepo) << endl;
+    cout << "AdminRepo initialized: " << (&adminRepo) << endl;
+    cout << "UserService initialized: " << (&userService) << endl;
+    cout << "PlayerService initialized: " << (&playerService) << endl;
+    cout << "AdminService initialized: " << (&adminService) << endl;
+    cout << "RoomService initialized: " << (&roomService) << endl;
+    cout << "GameService initialized: " << (&gameService) << endl;
+
+    printf("Ket thuc doan cua Phong\n");
+    // cout << "AuthRepo initialized: " << (this->authRepo) << endl;
+    // cout << "PlayerRepo initialized: " << (this->playerRepo) << endl;
+    // cout << "AdminRepo initialized: " << (this->adminRepo) << endl;
+    // cout << "UserService initialized: " << (this->userService) << endl;
+    // cout << "PlayerService initialized: " << (this->playerService) << endl;
+    // cout << "AdminService initialized: " << (this->adminService) << endl;
+    // cout << "RoomService initialized: " << (this->roomService) << endl;
+    // cout << "GameService initialized: " << (this->gameService) << endl;
+
     json response_data;
 
     if (type == "SIGN_UP") {
