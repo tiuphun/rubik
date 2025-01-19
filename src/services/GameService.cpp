@@ -88,10 +88,11 @@ void GameService::stopPeriodicUpdates() {
 json GameService::sendCubeState(int sessionId, int adminSocketFd) {
     auto* session = entityManager.getGameSessionbyId(sessionId);
     if (!session) {
-        return;
+        return MessageCrafter::craftResponse("error", {{"message", "Game session not found"}});
     }
 
     nlohmann::json response = MessageCrafter::craftResponse("success", {
+        {"message", "Cube state updated"},
         {"session", session->toJson()}
     });
     return response;

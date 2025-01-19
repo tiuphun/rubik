@@ -25,9 +25,9 @@ public:
         , adminRepo(db)
         , userService(playerRepo, adminRepo, authRepo, *entityManager, adminService, playerService)
         , playerService(*entityManager, playerRepo)
-        , adminService(adminRepo, playerRepo, *entityManager)
-        , roomService(*entityManager)
-        , gameService(*entityManager) {}
+        , gameService(*entityManager)
+        , adminService(adminRepo, playerRepo, *entityManager, gameService)
+        , roomService(*entityManager) {}
 
     json parseMessage(const std::string& message);
     json handleMessage(const json& parsed_message, sqlite3* db, int client_socket);
@@ -41,9 +41,10 @@ private:
     // Services
     UserService userService;
     PlayerService playerService; 
+    GameService gameService;
     AdminService adminService;
     RoomService roomService;
-    GameService gameService;
+    
 
      json handleSignUp(const json& parsed_message, sqlite3* db);
      json handleSignIn(const json& parsed_message, sqlite3* db, int client_socket);
