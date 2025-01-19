@@ -19,21 +19,21 @@ using json = nlohmann::json;
 class MessageHandler {
 public:
      MessageHandler(sqlite3* db) 
-        : entityManager(std::make_unique<EntityManager>())
+        : entityManager(EntityManager::getInstance())
         , authRepo(db)
         , playerRepo(db)
         , adminRepo(db)
-        , userService(playerRepo, adminRepo, authRepo, *entityManager, adminService, playerService)
-        , playerService(*entityManager, playerRepo)
-        , adminService(adminRepo, playerRepo, *entityManager)
-        , roomService(*entityManager)
-        , gameService(*entityManager) {}
+        , userService(playerRepo, adminRepo, authRepo, entityManager, adminService, playerService)
+        , playerService(entityManager, playerRepo)
+        , adminService(adminRepo, playerRepo, entityManager)
+        , roomService(entityManager)
+        , gameService(entityManager) {}
 
     json parseMessage(const std::string& message);
     json handleMessage(const json& parsed_message, sqlite3* db, int client_socket);
     json craftResponse(const std::string& status, const json& data);
 private:
-    std::unique_ptr<EntityManager> entityManager;
+    EntityManager& entityManager;
     AuthRepository authRepo;
     PlayerRepository playerRepo;
     AdminRepository adminRepo;

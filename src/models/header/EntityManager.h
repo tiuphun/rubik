@@ -14,7 +14,12 @@
 using namespace std;
 class EntityManager {
 public:
-    EntityManager() = default;
+    static EntityManager& getInstance() {
+        static EntityManager instance;
+        return instance;
+    }
+    EntityManager(const EntityManager&) = delete;
+    EntityManager& operator=(const EntityManager&) = delete;
     
     void addPlayer(unique_ptr<Player> player);
     void addAdmin(unique_ptr<Admin> admin);
@@ -47,6 +52,7 @@ public:
     vector<GameSession*> getRoomGameSessions(int roomId) const;
 
 private:
+    EntityManager() = default;
     vector<unique_ptr<Player>> players;
     vector<unique_ptr<Admin>> admins;
     vector<unique_ptr<Room>> rooms;

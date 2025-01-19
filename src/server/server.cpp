@@ -67,6 +67,7 @@ void Server::handleClient(int client_socket) {
         string message(buffer, bytes_read);
         cout << "Received message: " << message << endl; // Debug print
         processMessage(message, client_socket);
+        memset(buffer,0,sizeof(buffer));
     }
 
     //sqlite3_close(client_db);
@@ -113,8 +114,6 @@ void Server::start() {
                 close(client_socket);
                 exit(1);
             }
-            
-            messageHandler = std::make_unique<MessageHandler>(child_db);
 
             handleClient(client_socket);
             close(client_socket);

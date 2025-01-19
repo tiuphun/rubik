@@ -33,7 +33,7 @@ private:
     sqlite3 *db;
     //const char* db_path = "/Users/tieuphuong/rubik/src/database/migration/Rubik.db";
     const char* db_path = "/Volumes/DATA/repository/rubikFinal/rubik/src/database/migration/Rubik.db";
-    std::unique_ptr<MessageHandler> messageHandler = std::make_unique<MessageHandler>(db);
+    std::unique_ptr<MessageHandler> messageHandler;
 
 };
 
