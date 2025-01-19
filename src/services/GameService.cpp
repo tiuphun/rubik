@@ -68,11 +68,11 @@ bool GameService::isPlayerInSession(int sessionId, int playerId) {
 }
 
 
-void GameService::startPeriodicUpdates(int sessionId, int adminSocketFd, int intervalSeconds) {
+json GameService::startPeriodicUpdates(int sessionId, int adminSocketFd, int intervalSeconds) {
     stopUpdates = false;
     updateThread = std::thread([this, sessionId, adminSocketFd, intervalSeconds]() {
         while (!stopUpdates) {
-            sendCubeState(sessionId, adminSocketFd);
+            return sendCubeState(sessionId, adminSocketFd);
             std::this_thread::sleep_for(std::chrono::seconds(intervalSeconds));
         }
     });
@@ -92,7 +92,7 @@ json GameService::sendCubeState(int sessionId, int adminSocketFd) {
     }
 
     nlohmann::json response = MessageCrafter::craftResponse("success", {
-        {"message", "Cube state updated"},
+        {"message", "Cube state updating..."},
         {"session", session->toJson()}
     });
     return response;

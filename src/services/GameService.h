@@ -16,7 +16,7 @@ public:
     nlohmann::json endGameSession(int sessionId, int playerId);
     nlohmann::json updateCubeState(int sessionId, int playerId, const string& newCubeState);
     nlohmann::json getGameState(int sessionId);
-    void startPeriodicUpdates(int sessionId, int adminSocketFd, int intervalSeconds);
+    json startPeriodicUpdates(int sessionId, int adminSocketFd, int intervalSeconds);
     void stopPeriodicUpdates();
 
 private:
