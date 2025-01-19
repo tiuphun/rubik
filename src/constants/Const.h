@@ -36,4 +36,19 @@ enum ValidationStatus{
     FAIL
 };
 
+
+inline RoomParticipantStatus stringToRoomParticipantStatus(const std::string& status) {
+    if (status == "PLAYER") {
+        return RoomParticipantStatus::PLAYER;
+    } else if (status == "PLAYER_SPECTATOR") {
+        return RoomParticipantStatus::PLAYER_SPECTATOR;
+    } else if(status == "ADMIN_SPECTATOR"){
+        return RoomParticipantStatus::ADMIN_SPECTATOR;
+    }else {
+        throw std::invalid_argument("Invalid RoomParticipantStatus value");
+    }
+}
+
+
+
 #endif 

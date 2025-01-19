@@ -8,6 +8,8 @@ public:
 
     // Login
     static const char* FIND_AUTH_USER;
+    static const char* FIND_AUTH_USER_BY_NAME;
+    static const char* FIND_AUTH_USER_BY_STATUS;
 
     // Admin Queries
     static const char* CREATE_ADMIN_TABLE;
@@ -15,6 +17,7 @@ public:
     static const char* SELECT_ALL_ADMIN;
     static const char* BAN_PLAYER;
     static const char* SELECT_ADMIN_BY_ID;
+    static const char* UPDATE_ADMIN_LAST_LOGIN;
 
     // Player Queries
     static const char* CREATE_PLAYER_TABLE;
@@ -22,6 +25,8 @@ public:
     static const char* SELECT_ALL_PLAYER;
     static const char* SELECT_PLAYER_BY_USERNAME;
     static const char* SELECT_PLAYER_BY_ID;
+    static const char* UPDATE_PLAYER_STATUS_ACTIVE;
+    static const char* UPDATE_PLAYER_STATUS_INACTIVE;
 
     // Room Queries
     static const char* CREATE_ROOM_TABLE;

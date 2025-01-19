@@ -82,7 +82,7 @@ StandardCube Cube_To_Standard(Cube bcube) {
 Cube Rotate_Clockwise(Cube bcube, int element) {
     Cube result = bcube;
     int arr[4][4]; 
-    int i, j;
+    int i;
     for (i=0; i<6; i++)
     {
         result.color[element][i+2] = bcube.color[element][i];
@@ -135,7 +135,7 @@ Cube Rotate_Clockwise(Cube bcube, int element) {
 Cube Rotate_Anti_Clockwise(Cube bcube, int element) {
     Cube result = bcube;
     int arr[4][4]; 
-    int i, j;
+    int i;
     for (i=0; i<6; i++)
     {
         result.color[element][i] = bcube.color[element][i+2];

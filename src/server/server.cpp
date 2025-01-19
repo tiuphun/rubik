@@ -1,20 +1,21 @@
 #include <sstream>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <vector>
+#include <mutex>
 #include "../database/header/database.h"
 #include "../database/queries/Query.h"
 #include "Server.h"
-#include "../messages/MessageHandler.h"
+
 
 using namespace std;
 
 #define PORT 8080
 
-int Server::room_id_counter = 1;
-int Server::game_session_id_counter = 1;
-int Server::player_game_session_id_counter = 1;
 
-Server::Server() : playerRepo(db), adminRepo(db) {
+Server::Server(){
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
         cerr << "Failed to create socket\n";
@@ -44,18 +45,13 @@ Server::Server() : playerRepo(db), adminRepo(db) {
         close(server_socket);
         exit(1);
     }
-
     cout << "Database initialization successful!\n"; 
-}
-
-sqlite3* Server::getDb() {
-    return db;
 }
 
 void Server::handleClient(int client_socket) {
     char buffer[1024] = {0};
-    string welcome_msg = "Welcome to the Rubik Server! Send your JSON messages.\n";
-    send(client_socket, welcome_msg.c_str(), welcome_msg.length(), 0);
+    // string welcome_msg = "Welcome to the Rubik Server! Send your JSON messages.\n";
+    // send(client_socket, welcome_msg.c_str(), welcome_msg.length(), 0);
 
     while (true) {
         int bytes_read = read(client_socket, buffer, 1024);
@@ -66,14 +62,20 @@ void Server::handleClient(int client_socket) {
         }
 
         string message(buffer, bytes_read);
+        cout << "Received message: " << message << endl; // Debug print
         processMessage(message, client_socket);
     }
 }
 
 void Server::processMessage(const std::string& message, int client_socket) {
-    json parsed_message = MessageHandler::parseMessage(message);
-    json response = MessageHandler::handleMessage(parsed_message, db);
+    cout << "Processing message\n" << endl;
+    nlohmann::json parsed_message = messageHandler->parseMessage(message);
+    cout << "Parsed message: " << parsed_message.dump() << endl; // Debug print
+    //json response = MessageHandler::handleMessage(parsed_message, db, client_socket);
+    json response = messageHandler->handleMessage(parsed_message,db,client_socket);
+    cout << "Handled message\n" << endl;
     string response_str = response.dump();
+    cout << "Request response: " << response_str << endl; // Debug print
     send(client_socket, response_str.c_str(), response_str.length(), 0);
 }
 
@@ -89,43 +91,22 @@ void Server::start() {
         }
 
         cout << "New client connected\n";
+
+        pid_t pid = fork();
+        if (pid < 0) {
+            cerr << "Fork failed\n";
+            close(server_socket);
+            continue;
+        }
+        if (pid == 0) {
+            close(server_socket);
+            handleClient(client_socket);
+            close(client_socket);
+            exit(0);
+        } else {
+            close(client_socket);
+            waitpid(-1, nullptr, WNOHANG);
+        }
         handleClient(client_socket);
     }
-}
-
-void Server::addPlayer(const Player& player) {
-    players.push_back(player);
-}
-
-void Server::addAdmin(const Admin& admin) {
-    admins.push_back(admin);
-}
-
-void Server::addRoom(const Room& room) {
-    rooms.push_back(room);
-}
-
-vector<Player>& Server::getPlayers() {
-    return players;
-}
-
-vector<Admin>& Server::getAdmins() {
-    return admins;
-}
-
-vector<Room>& Server::getRooms() {
-    return rooms;
-}
-
-Room Server::getRoomById(int room_id){
-    for (const Room& room: rooms)
-    {
-        if (room.id == room_id)
-        {
-            return room;
-        }
-        
-    }
-    throw runtime_error("Room with id:" + to_string(room_id) + " not found when Player trying to get room");   
-    
 }

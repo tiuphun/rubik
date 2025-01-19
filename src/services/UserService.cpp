@@ -1,142 +1,121 @@
 #include "UserService.h"
+#include "AdminService.h"
+#include "PlayerService.h"
 #include "../database/queries/Query.h"
-#include "../messages/MessageHandler.h"
-#include <../server/Server.h>
-#include "openssl/sha.h"
+#include "../messages/MessageCrafter.h"
+#include "../models/header/EntityManager.h"
+#include "../include/openssl/sha.h"
+
 #include <string>
 #include <string.h>
-
+#include <iostream>
 
 using namespace std;
 
-UserService::UserService(PlayerRepository& playerRepo, AdminRepository& adminRepo, Server& server)
-    : playerRepo(playerRepo), adminRepo(adminRepo), server(server) {
-    db = server.getDb();
-}
-
-json UserService::signUp(const string& username, const string& password) {
+nlohmann::json UserService::signUp(const string& username, const string& password) {
     // Hash the password
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((unsigned char*)password.c_str(), password.length(), hash);
     string password_hash(reinterpret_cast<char*>(hash), SHA256_DIGEST_LENGTH);
+    printf("Hashed password: %s\n", password_hash.c_str());
 
-    const char* check_user_sql = Query::FIND_AUTH_USER;
-    sqlite3_stmt * check_user_stmt;
-    int rc = sqlite3_prepare_v2(db, check_user_sql, -1, &check_user_stmt, nullptr);
-    if (rc != SQLITE_OK)
-    {
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-    }
-    sqlite3_bind_text(check_user_stmt, 1, username.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(check_user_stmt, 2, password_hash.c_str(), -1, SQLITE_STATIC);
+    // Test response
+    string user_type;
+    if (username == "admin") user_type = "ADMIN";
+    else user_type = "PLAYER";
+    nlohmann::json test = MessageCrafter::craftResponse("success", {{"message", "Your account is created"}, {"user_type", user_type}});
+    printf("Response: %s\n", test.dump().c_str());
+    return test; 
 
-    if (sqlite3_step(check_user_stmt) == SQLITE_ROW) {
-        sqlite3_finalize(check_user_stmt);
-        return MessageHandler::craftResponse("error", {{"message", "Username already exists"}});
-    }
-    sqlite3_finalize(check_user_stmt);
-    
+    // All the code below is not running
+    bool checkUsernameTaken = authRepo.isUsernameTaken(username);
+    printf("Username taken? %d\n", checkUsernameTaken);
 
-    // Prepare SQL statement
-    const char* sql = Query::INSERT_PLAYER;
-    sqlite3_stmt* stmt;
-    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK) {
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-    }
-
-    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, password_hash.c_str(), -1, SQLITE_STATIC);
-
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE) {
-        sqlite3_finalize(stmt);
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-    }
-
-    sqlite3_finalize(stmt);
-    return MessageHandler::craftResponse("success", {{"message", "User registered successfully"}});
-}
-
-json UserService::signIn(const string& username, const string& password) {
-    // Hash the password
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256((unsigned char*)password.c_str(), password.length(), hash);
-    string password_hash(reinterpret_cast<char*>(hash), SHA256_DIGEST_LENGTH);
-
-    // Prepare SQL statement to check if the user exists in AuthUsers view
-    const char* sql = Query::FIND_AUTH_USER;
-    sqlite3_stmt* stmt;
-    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK) {
-        return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-    }
-
-    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, password_hash.c_str(), -1, SQLITE_STATIC);
-
-    rc = sqlite3_step(stmt);
-    if (rc == SQLITE_ROW) {
-        int id = sqlite3_column_int(stmt, 0);
-        string user_type = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
-        string account_status = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
-
-        sqlite3_finalize(stmt);
-
-        if (user_type == "PLAYER") {
-            if (account_status == "BANNED") {
-                return MessageHandler::craftResponse("error", {{"message", "User is banned"}});
-            } else if (account_status == "ACTIVE") {
-                return MessageHandler::craftResponse("error", {{"message", "User is already online"}});
-            } else if (account_status == "INACTIVE") {
-                // Update account status to ACTIVE
-                const char* update_sql = "UPDATE Player SET status = 'ACTIVE' WHERE id = ?";
-                sqlite3_stmt* update_stmt;
-                rc = sqlite3_prepare_v2(db, update_sql, -1, &update_stmt, nullptr);
-                if (rc != SQLITE_OK) {
-                    return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-                }
-                sqlite3_bind_int(update_stmt, 1, id);
-                rc = sqlite3_step(update_stmt);
-                sqlite3_finalize(update_stmt);
-                if (rc != SQLITE_DONE) {
-                    return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-                }
-                
-                //SELECT THE PLAYER BY ID and then parse the data to the player object
-                Player player = playerRepo.getPlayerById(id);
-                //Add player to server PLAYER VECTOR
-                server.addPlayer(player);
-                return MessageHandler::craftResponse("success", {{"message", "Player signed in successfully"}});
-            }
-        } else if (user_type == "ADMIN") {
-            if (account_status == "BANNED") {
-                return MessageHandler::craftResponse("error", {{"message", "User is banned"}});
-            } else if (account_status == "ACTIVE") {
-                return MessageHandler::craftResponse("error", {{"message", "User is already online"}});
-            } else if (account_status == "INACTIVE") {
-                // Update account status to ACTIVE
-                const char* update_sql = "UPDATE Admin SET status = 'ACTIVE' WHERE id = ?";
-                sqlite3_stmt* update_stmt;
-                rc = sqlite3_prepare_v2(db, update_sql, -1, &update_stmt, nullptr);
-                if (rc != SQLITE_OK) {
-                    return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-                }
-                sqlite3_bind_int(update_stmt, 1, id);
-                rc = sqlite3_step(update_stmt);
-                sqlite3_finalize(update_stmt);
-                if (rc != SQLITE_DONE) {
-                    return MessageHandler::craftResponse("error", {{"message", sqlite3_errmsg(db)}});
-                }
-                //SELECT THE ADMIN BY ID and then parse the data to the admin object
-                Admin admin = adminRepo.getAdminById(id);
-                //Add admin to server ADMIN VECTOR
-                server.addAdmin(admin);
-                return MessageHandler::craftResponse("success", {{"message", "Admin signed in successfully"}});
-            }
+    if(checkUsernameTaken){
+        return MessageCrafter::craftResponse("error", {{"message", "Username is already taken"}});   
+    }else{
+        bool result = playerRepo.registerPlayer(username,password_hash);
+        if(result){
+            return MessageCrafter::craftResponse("success", {{"message", "Player created successfully"}});
+        }else{
+            return MessageCrafter::craftResponse("error", {{"message", "Failed to create the player in the database"}});
         }
-    } else {
-        sqlite3_finalize(stmt);
-        return MessageHandler::craftResponse("error", {{"message", "Invalid username or password"}});
+    }  
+}
+
+nlohmann::json UserService::signIn(const string& username, const string& password, int client_socket) {
+    // Hash the password
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256((unsigned char*)password.c_str(), password.length(), hash);
+    string password_hash(reinterpret_cast<char*>(hash), SHA256_DIGEST_LENGTH);
+    // printf("Hashed password: %s\n", password_hash.c_str());
+
+    // This is just for testing. No check at all
+    // string user_type;
+    // if (username == "admin") user_type = "ADMIN";
+    // else user_type = "PLAYER";
+    // nlohmann::json test = MessageCrafter::craftResponse("success", {{"message", "You are signed in"}, {"user_type", user_type}});
+    // printf("Response: %s\n", test.dump().c_str());
+    // return test;
+
+    // All the code below is not running
+    bool checkPlayerBanned = authRepo.isPlayerBanned(username);
+    printf("Player banned? %d\n", checkPlayerBanned);
+    if(checkPlayerBanned){
+        nlohmann::json response = MessageCrafter::craftResponse("error", {{"message", "Player is banned"}});
+        printf("Response: %s\n", response.dump().c_str());
+        return response;
     }
+
+    auto authResult = authRepo.validateCredentials(username, password_hash);
+    if (authResult->user_type == "PLAYER"){
+        if(authResult->account_status == "BANNED"){
+            nlohmann::json response = MessageCrafter::craftResponse("error", {{"message", "Player is banned!"}});
+            printf("Response: %s\n", response.dump().c_str());
+            return response;
+        }else if(authResult->account_status == "ACTIVE"){
+            nlohmann::json response = MessageCrafter::craftResponse("error", {{"message", "Player is online"}});
+            printf("Response: %s\n", response.dump().c_str());
+            return response;
+        }else{
+             //IF NOT BANNED or ACTIVE, find the player details, create a new player under EntityManager. Then update the status to the database
+             int player_id = authResult->id;
+             Player player = playerRepo.getPlayerById(player_id);
+             //Make a playerPtr and add it to entityManager
+             auto playerPtr = make_unique<Player>(player);
+             entityManager.addPlayer(std::move(playerPtr));
+             if(playerRepo.connectPlayerStatusUpdate(player_id)){
+                cout << "Player with id: " << player_id << " has updated the status to ACTIVE" << endl;
+             }else{
+                cerr << "Failed to update player ACTIVE status for player with id: " << player_id << endl;
+             }
+             playerService.updatePlayerSocket(authResult->id, client_socket); // update socket fd for player here
+             nlohmann::json response = MessageCrafter::craftResponse("success", {{"message", "Player is signed in"}, {"player_id", player_id}});
+             printf("Response: %s\n", response.dump().c_str());
+             return response;
+        }
+       
+    } else if (authResult->user_type == "ADMIN"){
+       
+        int admin_id = authResult->id;
+        Admin admin = adminRepo.getAdminById(admin_id);
+
+        //Make a adminPtr and add it to entityManager
+        auto adminPtr = make_unique<Admin>(admin);
+        entityManager.addAdmin(std::move(adminPtr));
+
+        if(adminRepo.updateAdminLastLogin(admin_id)){
+            cout << "Admin with id: " << admin_id << " has updated last_login to datetime(now)" << endl;
+        }else{
+            cerr << "Failed to update last login for admin with id: " << admin_id << endl;
+        }
+        adminService.updateAdminSocket(authResult->id, client_socket); // update socket fd for admin here
+
+        nlohmann::json response = MessageCrafter::craftResponse("success", {{"message", "Admin is signed in"}, {"admin_id", admin_id}});
+        printf("Response: %s\n", response.dump().c_str());
+        return response;
+    }
+    // nlohmann::json response = MessageCrafter::craftResponse("error", {{"message", "Wrong username or password"}});
+    // printf("Response: %s\n", response.dump().c_str());
+    // return response;
 }

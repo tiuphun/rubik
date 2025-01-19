@@ -155,8 +155,14 @@ const char* Query::CREATE_ADMIN_TABLE =
     "created_at DATETIME DEFAULT (datetime('now')),"
     "last_login DATETIME"
     ");";
+
 const char* Query::FIND_AUTH_USER = 
     "SELECT id, username, user_type, account_status FROM AuthUsers WHERE username = ? AND password_hash = ? LIMIT 1;";
+const char* Query::FIND_AUTH_USER_BY_NAME = 
+    "SELECT id FROM AuthUsers WHERE username = ? LIMIT 1;";
+
+const char* Query::FIND_AUTH_USER_BY_STATUS = 
+    "SELECT account_status FROM AuthUsers WHERE username = ? LIMIT 1;";
 
 const char* Query::INSERT_ADMIN = 
     "INSERT INTO Admin(id,username,password_hash) "
@@ -170,6 +176,9 @@ const char* Query::SELECT_ADMIN_BY_ID =
 
 const char* Query::BAN_PLAYER =
     "UPDATE Player SET status = 'BANNED', ban_by = ? WHERE id = ?;";
+
+const char* Query::UPDATE_ADMIN_LAST_LOGIN =
+    "UPDATE Admin SET last_login = ? WHERE id = ?;";
     
 // Player Queries
 const char* Query::CREATE_PLAYER_TABLE = 
@@ -200,6 +209,14 @@ const char* Query::SELECT_PLAYER_BY_USERNAME =
 
 const char* Query::SELECT_PLAYER_BY_ID =
     "SELECT * FROM Player WHERE id = ?;";
+
+const char* Query::UPDATE_PLAYER_STATUS_ACTIVE =
+    "UPDATE Player SET STATUS = 'ACTIVE' WHERE id = ?";
+
+const char* Query::UPDATE_PLAYER_STATUS_INACTIVE =
+    "UPDATE Player SET STATUS = 'INACTIVE' WHERE id = ?";
+
+
 
 // Room Queries
 const char* Query::CREATE_ROOM_TABLE = 
