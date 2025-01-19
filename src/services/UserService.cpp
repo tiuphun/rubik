@@ -23,9 +23,9 @@ nlohmann::json UserService::signUp(const string& username, const string& passwor
     string user_type;
     if (username == "admin") user_type = "ADMIN";
     else user_type = "PLAYER";
-    // nlohmann::json test = MessageCrafter::craftResponse("success", {{"message", "Your account is created"}, {"user_type", user_type}});
-    // printf("Response: %s\n", test.dump().c_str());
-    // return test; 
+    nlohmann::json test = MessageCrafter::craftResponse("success", {{"message", "Your account is created"}, {"user_type", user_type}});
+    printf("Response: %s\n", test.dump().c_str());
+    return test; 
 
     // All the code below is not running
     bool checkUsernameTaken = authRepo.isUsernameTaken(username);
@@ -104,7 +104,7 @@ nlohmann::json UserService::signIn(const string& username, const string& passwor
                 cerr << "Failed to update player ACTIVE status for player with id: " << player_id << endl;
              }
              playerService.updatePlayerSocket(authResult->id, client_socket); // update socket fd for player here
-             nlohmann::json response = MessageCrafter::craftResponse("success", {{"message", player_id}});
+             nlohmann::json response = MessageCrafter::craftResponse("success", {{"message", "Player is signed in"}, {"player_id", player_id}});
              printf("Response: %s\n", response.dump().c_str());
              return response;
         }
@@ -125,7 +125,7 @@ nlohmann::json UserService::signIn(const string& username, const string& passwor
         }
         adminService.updateAdminSocket(authResult->id, client_socket); // update socket fd for admin here
 
-        nlohmann::json response = MessageCrafter::craftResponse("success", {{"message", admin_id}});
+        nlohmann::json response = MessageCrafter::craftResponse("success", {{"message", "Admin is signed in"}, {"admin_id", admin_id}});
         printf("Response: %s\n", response.dump().c_str());
         return response;
     }

@@ -52,7 +52,9 @@ json MessageHandler::handleMessage(const json& parsed_message, sqlite3* db, int 
     } else if (type == "BAN_PLAYER") {
         response_data = handleBanPlayer(parsed_message["data"], db);
     } else if (type == "SPECTATE") {
-        response_data = handleSpectate(parsed_message["data"], db);
+        response_data = handleSpectate(parsed_message["data"], db, client_socket);
+    } else if (type == "UPDATE_CUBE") {
+        response_data = handleCubeUpdate(parsed_message["data"], db);
     }
     return response_data;
 }
@@ -112,7 +114,7 @@ json MessageHandler::handleEndGame(const json& data, sqlite3* db) {
 
 json MessageHandler::handleViewUsers(const json& data, sqlite3* db) {
     vector<Player> players = playerRepo.getAllPlayers();
-    return playerService.returnPlayersJson(players);
+    return adminService.viewPlayerList();
 }
 
 json MessageHandler::handleBanPlayer(const json& data, sqlite3* db) {
@@ -121,8 +123,15 @@ json MessageHandler::handleBanPlayer(const json& data, sqlite3* db) {
     return adminService.banPlayer(player_id, admin_id);
 }
 
-json MessageHandler::handleSpectate(const json& data, sqlite3* db) {
+json MessageHandler::handleSpectate(const json& data, sqlite3* db, int adminSocketFd) {
+    int game_session_id = data["game_session_id"];
     int room_id = data["room_id"];
-    int participant_id = data["participant_id"];
-    return adminService.spectate(room_id, participant_id);
+    return adminService.spectate(game_session_id, room_id, adminSocketFd);
+}
+
+json MessageHandler::handleCubeUpdate(const json& data, sqlite3* db) {
+    int player_id = data["player_id"];
+    int game_session_id = data["game_session_id"];
+    string new_cube_state = data["new_cube_state"];
+    return gameService.updateCubeState(game_session_id, player_id, new_cube_state);
 }

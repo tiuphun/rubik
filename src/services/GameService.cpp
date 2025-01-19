@@ -41,7 +41,7 @@ nlohmann::json GameService::updateCubeState(int sessionId, int playerId, const s
 
     return MessageCrafter::craftResponse("success", {
         {"message", "Cube state updated"},
-        {"session", session->toJson()}
+        // {"session", session->toJson()}
     });
 }
 
@@ -65,4 +65,35 @@ bool GameService::isValidCubeState(const string& cubeState) {
 bool GameService::isPlayerInSession(int sessionId, int playerId) {
     auto* session = entityManager.getGameSessionbyId(sessionId);
     return session && session->player_id == playerId;
+}
+
+
+void GameService::startPeriodicUpdates(int sessionId, int adminSocketFd, int intervalSeconds) {
+    stopUpdates = false;
+    updateThread = std::thread([this, sessionId, adminSocketFd, intervalSeconds]() {
+        while (!stopUpdates) {
+            sendCubeState(sessionId, adminSocketFd);
+            std::this_thread::sleep_for(std::chrono::seconds(intervalSeconds));
+        }
+    });
+}
+
+void GameService::stopPeriodicUpdates() {
+    stopUpdates = true;
+    if (updateThread.joinable()) {
+        updateThread.join();
+    }
+}
+
+json GameService::sendCubeState(int sessionId, int adminSocketFd) {
+    auto* session = entityManager.getGameSessionbyId(sessionId);
+    if (!session) {
+        return MessageCrafter::craftResponse("error", {{"message", "Game session not found"}});
+    }
+
+    nlohmann::json response = MessageCrafter::craftResponse("success", {
+        {"message", "Cube state updating..."},
+        {"session", session->toJson()}
+    });
+    return response;
 }
