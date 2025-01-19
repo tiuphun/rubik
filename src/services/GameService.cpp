@@ -68,11 +68,11 @@ bool GameService::isPlayerInSession(int sessionId, int playerId) {
 }
 
 
-json GameService::startPeriodicUpdates(int sessionId, int adminSocketFd, int intervalSeconds) {
+void GameService::startPeriodicUpdates(int sessionId, int adminSocketFd, int intervalSeconds) {
     stopUpdates = false;
     updateThread = std::thread([this, sessionId, adminSocketFd, intervalSeconds]() {
         while (!stopUpdates) {
-            return sendCubeState(sessionId, adminSocketFd);
+            sendCubeState(sessionId, adminSocketFd);
             std::this_thread::sleep_for(std::chrono::seconds(intervalSeconds));
         }
     });

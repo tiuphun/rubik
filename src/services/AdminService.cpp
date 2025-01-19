@@ -67,9 +67,9 @@ nlohmann::json AdminService::spectate(int game_session_id, int room_id, int admi
         room->current_spectators++;
 
         // Start periodic updates
-        return gameService.startPeriodicUpdates(game_session_id, adminSocketFd, 5); // Update every 5 seconds
+        gameService.startPeriodicUpdates(game_session_id, adminSocketFd, 5); // Update every 5 seconds
         
-        // return MessageCrafter::craftResponse("success","Admin is now spectating the game");
+        return MessageCrafter::craftResponse("success","Admin is now spectating the game");
     }else{
         return MessageCrafter::craftResponse("error","Cannot spectate the game");
     }
