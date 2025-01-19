@@ -4,14 +4,14 @@
 using namespace std;
 
 bool AuthRepository::isUsernameTaken(const string& username) {
+    
     const char* check_query = Query::FIND_AUTH_USER_BY_NAME;
     sqlite3_stmt* check_user_exist_stmt = nullptr;
-
     int rc = sqlite3_prepare_v2(db, check_query, -1, &check_user_exist_stmt, nullptr);
+    
     if (rc != SQLITE_OK) {
-        cerr << "Error: Failed to prepare statement to check if username is taken: " 
-             << sqlite3_errmsg(db) << endl;
-        return false;  
+        cerr << "SQLite prepare error: " << sqlite3_errmsg(db) << endl;
+        return false;
     }
 
     sqlite3_bind_text(check_user_exist_stmt, 1, username.c_str(), -1, SQLITE_STATIC);
@@ -19,6 +19,8 @@ bool AuthRepository::isUsernameTaken(const string& username) {
     rc = sqlite3_step(check_user_exist_stmt);
     if (rc == SQLITE_ROW) { //If username exist.
         sqlite3_finalize(check_user_exist_stmt); 
+        cout << "Username taken check successful, row returned!" << endl;
+
         return true;
     } else if (rc == SQLITE_DONE) {
         sqlite3_finalize(check_user_exist_stmt); 

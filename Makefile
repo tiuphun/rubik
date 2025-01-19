@@ -31,10 +31,11 @@ INCLUDES = -I$(SRC_DIR)/constants \
            -I$(SRC_DIR)/messages \
            -I$(SRC_DIR)/services \
            -I$(SRC_DIR)/repositories \
-           -Iinclude
+           -Iinclude \
+           -I/opt/homebrew/opt/openssl@3/include  # Add OpenSSL include path
 
 # Libraries
-LIBS = -lsqlite3 -lcrypto
+LIBS = -lsqlite3 -lcrypto -L/opt/homebrew/opt/openssl@3/lib  # Add OpenSSL library path
 
 # Target executable
 TARGET = rubik-server

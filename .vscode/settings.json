@@ -74,6 +74,11 @@
         "__string": "cpp",
         "chrono": "cpp",
         "compare": "cpp",
-        "concepts": "cpp"
+        "concepts": "cpp",
+        "any": "cpp",
+        "span": "cpp",
+        "valarray": "cpp",
+        "numeric": "cpp",
+        "ranges": "cpp"
     }
 }

@@ -165,8 +165,8 @@ const char* Query::FIND_AUTH_USER_BY_STATUS =
     "SELECT account_status FROM AuthUsers WHERE username = ? LIMIT 1;";
 
 const char* Query::INSERT_ADMIN = 
-    "INSERT INTO Admin(id,username,password_hash) "
-    "VALUES(?,?,?);";
+    "INSERT INTO Admin(username,password_hash) "
+    "VALUES(?,?);";
 
 const char* Query::SELECT_ALL_ADMIN =
     "SELECT * FROM Admin;";

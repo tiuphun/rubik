@@ -20,9 +20,9 @@ nlohmann::json UserService::signUp(const string& username, const string& passwor
     printf("Hashed password: %s\n", password_hash.c_str());
 
     // Test response
-    // string user_type;
-    // if (username == "admin") user_type = "ADMIN";
-    // else user_type = "PLAYER";
+    string user_type;
+    if (username == "admin") user_type = "ADMIN";
+    else user_type = "PLAYER";
     // nlohmann::json test = MessageCrafter::craftResponse("success", {{"message", "Your account is created"}, {"user_type", user_type}});
     // printf("Response: %s\n", test.dump().c_str());
     // return test; 
@@ -34,12 +34,22 @@ nlohmann::json UserService::signUp(const string& username, const string& passwor
     if(checkUsernameTaken){
         return MessageCrafter::craftResponse("error", {{"message", "Username is already taken"}});   
     }else{
-        bool result = playerRepo.registerPlayer(username,password_hash);
-        if(result){
-            return MessageCrafter::craftResponse("success", {{"message", "Player created successfully"}});
+        if(user_type == "ADMIN"){
+            bool result = adminRepo.registerAdmin(username,password_hash);
+            if(result){
+                return MessageCrafter::craftResponse("success", {{"message", "Admin created successfully"}});
+            }else{
+                return MessageCrafter::craftResponse("error", {{"message", "Failed to create the admin in the database"}});
+            }
         }else{
-            return MessageCrafter::craftResponse("error", {{"message", "Failed to create the player in the database"}});
+            bool result = playerRepo.registerPlayer(username,password_hash);
+            if(result){
+                return MessageCrafter::craftResponse("success", {{"message", "Player created successfully"}});
+            }else{
+                return MessageCrafter::craftResponse("error", {{"message", "Failed to create the player in the database"}});
+            }
         }
+        
     }  
 }
 
@@ -81,8 +91,12 @@ nlohmann::json UserService::signIn(const string& username, const string& passwor
              //IF NOT BANNED or ACTIVE, find the player details, create a new player under EntityManager. Then update the status to the database
              int player_id = authResult->id;
              Player player = playerRepo.getPlayerById(player_id);
+             cout << "Player id: " << player.id << endl;
+                cout << "Player name: " << player.username << endl;
+                cout << "Player password hashed: " << player.password_hash << endl;
              //Make a playerPtr and add it to entityManager
              auto playerPtr = make_unique<Player>(player);
+             cout << "Player created: " << playerPtr->username << endl;
              entityManager.addPlayer(std::move(playerPtr));
              if(playerRepo.connectPlayerStatusUpdate(player_id)){
                 cout << "Player with id: " << player_id << " has updated the status to ACTIVE" << endl;

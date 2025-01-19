@@ -23,6 +23,47 @@ Admin AdminRepository::getAdminById(int id) {
     return admin;
 }
 
+bool AdminRepository::registerAdmin(const string& username, const string& password_hash) {
+    if (!db) {
+        cerr << "Database connection is null" << endl;
+        return false;
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    const char* sql = Query::INSERT_ADMIN;
+    
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        cerr << "Failed to prepare admin registration statement: " << sqlite3_errmsg(db) << endl;
+        return false;
+    }
+
+    // Bind parameters
+    rc = sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+    if (rc != SQLITE_OK) {
+        cerr << "Username bind failed: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    rc = sqlite3_bind_text(stmt, 2, password_hash.c_str(), -1, SQLITE_STATIC);
+    if (rc != SQLITE_OK) {
+        cerr << "Password hash bind failed: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        cerr << "Admin registration failed: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+    return true;
+}
+
 Admin AdminRepository::createAdminFromStmt(sqlite3_stmt* stmt) {
     int id = sqlite3_column_int(stmt, 0);
     std::string username = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));

@@ -4,6 +4,8 @@
 #include <iostream>
 
 using namespace std;
+
+
 std::vector<Player> PlayerRepository::getAllPlayers() {
     std::vector<Player> players;
     const char* sql = Query::SELECT_ALL_PLAYER;

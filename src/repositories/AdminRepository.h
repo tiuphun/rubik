@@ -9,6 +9,7 @@ class AdminRepository {
 public:
     AdminRepository(sqlite3* db) : db(db) {}
     Admin getAdminById(int id);
+    bool registerAdmin(const string& username, const string& password_hash);
     Admin createAdminFromStmt(sqlite3_stmt* stmt);
     bool updateAdminLastLogin(int id);
     sqlite3* getDb() const { return db; }
