@@ -7,8 +7,28 @@ using namespace std;
 
 nlohmann::json AdminService::viewPlayerList() {
     std::vector<Player> players = playerRepo.getAllPlayers();
+    nlohmann::json playerJson = nlohmann::json::array();
     //Construct player json from database here.
-    return MessageCrafter::craftResponse({"success"}, {"message", "PLAYER LIST HERE"});
+    for (const auto& player : players) {
+        nlohmann::json playerJson = {
+            {"id", player.id},
+            {"username", player.username},
+            {"join_date", player.join_date},
+            {"total_games", player.total_games},
+            {"wins", player.wins},
+            {"best_time", player.best_time},
+            {"avg_time", player.avg_time},
+            {"status", player.status},
+            {"ban_date", player.ban_date},
+            {"ban_by", player.ban_by}
+        };
+        playerJson.push_back(playerJson);
+    }
+
+    return MessageCrafter::craftResponse(
+        {"status", "success"},
+        {{"message", "Player list retrieved successfully"},
+        {"players", playerJson}});
 }
 
 nlohmann::json AdminService::banPlayer(int player_id,int admin_id) {
@@ -69,9 +89,9 @@ nlohmann::json AdminService::spectate(int game_session_id, int room_id, int admi
         // Start periodic updates
         gameService.startPeriodicUpdates(game_session_id, adminSocketFd, 5); // Update every 5 seconds
         
-        return MessageCrafter::craftResponse("success","Admin is now spectating the game");
+        return MessageCrafter::craftResponse("success",{"message", "Admin is now spectating the game"});
     }else{
-        return MessageCrafter::craftResponse("error","Cannot spectate the game");
+        return MessageCrafter::craftResponse("error",{"message", "Cannot spectate the game"});
     }
 } 
 
@@ -83,7 +103,7 @@ nlohmann::json AdminService::leaveGame(int admin_id) {
     // Stop periodic updates
     gameService.stopPeriodicUpdates();
     
-    return MessageCrafter::craftResponse("success","Admin left the game");
+    return MessageCrafter::craftResponse("success",{"message", "Admin left the game"});
 }
 
 bool AdminService::updateAdminSocket(int adminId, int socketFd) {
