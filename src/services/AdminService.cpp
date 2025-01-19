@@ -26,7 +26,7 @@ nlohmann::json AdminService::viewPlayerList() {
     }
 
     return MessageCrafter::craftResponse(
-        {"status", "success"},
+        "success",
         {{"message", "Player list retrieved successfully"},
         {"players", playerJson}});
 }
