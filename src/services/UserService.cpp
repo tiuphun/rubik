@@ -90,7 +90,7 @@ nlohmann::json UserService::signIn(const string& username, const string& passwor
                 cerr << "Failed to update player ACTIVE status for player with id: " << player_id << endl;
              }
              playerService.updatePlayerSocket(authResult->id, client_socket); // update socket fd for player here
-             nlohmann::json response = MessageCrafter::craftResponse("success", {{"message", player_id}});
+             nlohmann::json response = MessageCrafter::craftResponse("success", {{"message", "Player is signed in"}, {"player_id", player_id}});
              printf("Response: %s\n", response.dump().c_str());
              return response;
         }
@@ -111,7 +111,7 @@ nlohmann::json UserService::signIn(const string& username, const string& passwor
         }
         adminService.updateAdminSocket(authResult->id, client_socket); // update socket fd for admin here
 
-        nlohmann::json response = MessageCrafter::craftResponse("success", {{"message", admin_id}});
+        nlohmann::json response = MessageCrafter::craftResponse("success", {{"message", "Admin is signed in"}, {"admin_id", admin_id}});
         printf("Response: %s\n", response.dump().c_str());
         return response;
     }
