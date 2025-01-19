@@ -66,7 +66,7 @@ json MessageHandler::handleMessage(const json& parsed_message, sqlite3* db, int 
     } else if (type == "BAN_PLAYER") {
         response_data = handleBanPlayer(parsed_message["data"], db);
     } else if (type == "SPECTATE") {
-        response_data = handleSpectate(parsed_message["data"], db);
+        response_data = handleSpectate(parsed_message["data"], db, client_socket);
     } else if (type == "UPDATE_CUBE") {
         response_data = handleCubeUpdate(parsed_message["data"], db);
     }
@@ -137,10 +137,10 @@ json MessageHandler::handleBanPlayer(const json& data, sqlite3* db) {
     return adminService.banPlayer(player_id, admin_id);
 }
 
-json MessageHandler::handleSpectate(const json& data, sqlite3* db) {
+json MessageHandler::handleSpectate(const json& data, sqlite3* db, int adminSocketFd) {
     int room_id = data["room_id"];
     int participant_id = data["participant_id"];
-    return adminService.spectate(room_id, participant_id);
+    return adminService.spectate(room_id, participant_id, adminSocketFd);
 }
 
 json MessageHandler::handleCubeUpdate(const json& data, sqlite3* db) {

@@ -21,7 +21,7 @@ public:
     nlohmann::json banPlayer(int playerId, int adminId);
     nlohmann::json viewPlayerList();
     nlohmann::json viewRoomList();
-    nlohmann::json spectate(int gameSessionId, int roomId);
+    nlohmann::json spectate(int gameSessionId, int roomId, int adminSocketFd);
     nlohmann::json leaveGame(int adminId);
 
     // Admin management
@@ -32,6 +32,7 @@ private:
     AdminRepository& adminRepo;
     PlayerRepository& playerRepo;
     EntityManager& entityManager;
+    GameService gameService;
 };
 
 #endif // ADMINSERVICE_H

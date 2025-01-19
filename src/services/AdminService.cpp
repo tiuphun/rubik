@@ -51,7 +51,7 @@ nlohmann::json AdminService::viewRoomList() {
     });
 }
 
-nlohmann::json AdminService::spectate(int game_session_id, int room_id) {
+nlohmann::json AdminService::spectate(int game_session_id, int room_id, int adminSocketFd) {
     GameSession *gs = entityManager.getGameSessionbyId(game_session_id);
     Room *room = entityManager.getRoomById(room_id);
     if(gs && room){
@@ -66,6 +66,8 @@ nlohmann::json AdminService::spectate(int game_session_id, int room_id) {
         entityManager.addRoomParticipant(std::move(newSpectator));
         room->current_spectators++;
 
+        // Start periodic updates
+        gameService.startPeriodicUpdates(game_session_id, adminSocketFd, 5); // Update every 5 seconds
         
         return MessageCrafter::craftResponse("success","Admin is now spectating the game");
     }else{
@@ -77,6 +79,10 @@ nlohmann::json AdminService::leaveGame(int admin_id) {
     //DISCONNECT Admin Socket HERE
     entityManager.removeAdmin(admin_id);
     cout << "Admin with id:" << admin_id << "left the game";
+
+    // Stop periodic updates
+    gameService.stopPeriodicUpdates();
+    
     return MessageCrafter::craftResponse("success","Admin left the game");
 }
 

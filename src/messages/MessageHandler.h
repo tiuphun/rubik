@@ -57,7 +57,7 @@ private:
      json handleViewUsers(const json& parsed_message, sqlite3* db);
      json handleViewRooms(const json& parsed_message, sqlite3* db);
      json handleBanPlayer(const json& parsed_message, sqlite3* db);
-     json handleSpectate(const json& parsed_message, sqlite3* db); 
+     json handleSpectate(const json& parsed_message, sqlite3* db, int client_socket); 
     json handleCubeUpdate(const json& parsed_message, sqlite3* db);
 };
 
