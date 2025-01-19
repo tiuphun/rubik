@@ -128,7 +128,7 @@ json MessageHandler::handleEndGame(const json& data, sqlite3* db) {
 
 json MessageHandler::handleViewUsers(const json& data, sqlite3* db) {
     vector<Player> players = playerRepo.getAllPlayers();
-    return playerService.returnPlayersJson(players);
+    return adminService.viewPlayerList();
 }
 
 json MessageHandler::handleBanPlayer(const json& data, sqlite3* db) {
