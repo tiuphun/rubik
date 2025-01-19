@@ -58,6 +58,7 @@ private:
      json handleViewRooms(const json& parsed_message, sqlite3* db);
      json handleBanPlayer(const json& parsed_message, sqlite3* db);
      json handleSpectate(const json& parsed_message, sqlite3* db); 
+    json handleCubeUpdate(const json& parsed_message, sqlite3* db);
 };
 
 #endif

@@ -53,9 +53,21 @@ nlohmann::json AdminService::viewRoomList() {
 
 nlohmann::json AdminService::spectate(int game_session_id, int room_id) {
     GameSession *gs = entityManager.getGameSessionbyId(game_session_id);
-    if(gs){
+    Room *room = entityManager.getRoomById(room_id);
+    if(gs && room){
         //CRAFT GAME SESSION DETAILS HERE
-        return MessageCrafter::craftResponse("success","GAMESESSION");
+        auto newSpectator = make_unique<RoomParticipant>(
+            room_id,
+            RoomParticipantStatus::ADMIN_SPECTATOR,
+            gs->player_id,
+            false
+        );
+
+        entityManager.addRoomParticipant(std::move(newSpectator));
+        room->current_spectators++;
+
+        
+        return MessageCrafter::craftResponse("success","Admin is now spectating the game");
     }else{
         return MessageCrafter::craftResponse("error","Cannot spectate the game");
     }

@@ -67,6 +67,8 @@ json MessageHandler::handleMessage(const json& parsed_message, sqlite3* db, int 
         response_data = handleBanPlayer(parsed_message["data"], db);
     } else if (type == "SPECTATE") {
         response_data = handleSpectate(parsed_message["data"], db);
+    } else if (type == "UPDATE_CUBE") {
+        response_data = handleCubeUpdate(parsed_message["data"], db);
     }
     return response_data;
 }
@@ -139,4 +141,11 @@ json MessageHandler::handleSpectate(const json& data, sqlite3* db) {
     int room_id = data["room_id"];
     int participant_id = data["participant_id"];
     return adminService.spectate(room_id, participant_id);
+}
+
+json MessageHandler::handleCubeUpdate(const json& data, sqlite3* db) {
+    int player_id = data["player_id"];
+    int game_session_id = data["game_session_id"];
+    string new_cube_state = data["new_cube_state"];
+    return gameService.updateCubeState(game_session_id, player_id, new_cube_state);
 }

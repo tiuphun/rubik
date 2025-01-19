@@ -41,7 +41,7 @@ nlohmann::json GameService::updateCubeState(int sessionId, int playerId, const s
 
     return MessageCrafter::craftResponse("success", {
         {"message", "Cube state updated"},
-        {"session", session->toJson()}
+        // {"session", session->toJson()}
     });
 }
 

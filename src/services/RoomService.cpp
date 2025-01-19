@@ -37,7 +37,8 @@ nlohmann::json RoomService::startGameSession(int playerId, int roomId) {
     entityManager.addGameSession(std::move(newSession));
 
     return MessageCrafter::craftResponse("success", {
-        {"message", sessionJson}
+        {"message", "Game session started successfully"},
+        {"session", sessionJson}
     });
 }
 

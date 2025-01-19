@@ -98,8 +98,7 @@ nlohmann::json PlayerService::joinRoom(int playerId, int roomId, RoomParticipant
     }
 
     return MessageCrafter::craftResponse("success", {
-        {"message", "Joined room successfully"},
-        {"room_id", roomId}
+        {"message", "Joined room successfully"}
     });
 }
 

@@ -20,12 +20,12 @@ nlohmann::json UserService::signUp(const string& username, const string& passwor
     printf("Hashed password: %s\n", password_hash.c_str());
 
     // Test response
-    // string user_type;
-    // if (username == "admin") user_type = "ADMIN";
-    // else user_type = "PLAYER";
-    // nlohmann::json test = MessageCrafter::craftResponse("success", {{"message", "Your account is created"}, {"user_type", user_type}});
-    // printf("Response: %s\n", test.dump().c_str());
-    // return test; 
+    string user_type;
+    if (username == "admin") user_type = "ADMIN";
+    else user_type = "PLAYER";
+    nlohmann::json test = MessageCrafter::craftResponse("success", {{"message", "Your account is created"}, {"user_type", user_type}});
+    printf("Response: %s\n", test.dump().c_str());
+    return test; 
 
     // All the code below is not running
     bool checkUsernameTaken = authRepo.isUsernameTaken(username);
