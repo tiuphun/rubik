@@ -38,9 +38,9 @@ nlohmann::json AdminService::banPlayer(int player_id,int admin_id) {
 
     bool ban_ok = adminRepo.banPlayer(player_id, admin_id);
     if(ban_ok){
-        return MessageCrafter::craftResponse({"success"}, {"message", "Player banned successfully"});
+        return MessageCrafter::craftResponse("success", {"message", "Player banned successfully"});
     }else{
-        return MessageCrafter::craftResponse({"error"}, {"message", "Failed to update ban status to db"});
+        return MessageCrafter::craftResponse("error", {"message", "Failed to update ban status to db"});
     }
 }
 
