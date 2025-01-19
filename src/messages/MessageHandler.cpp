@@ -138,9 +138,9 @@ json MessageHandler::handleBanPlayer(const json& data, sqlite3* db) {
 }
 
 json MessageHandler::handleSpectate(const json& data, sqlite3* db, int adminSocketFd) {
+    int game_session_id = data["game_session_id"];
     int room_id = data["room_id"];
-    int participant_id = data["participant_id"];
-    return adminService.spectate(room_id, participant_id, adminSocketFd);
+    return adminService.spectate(game_session_id, room_id, adminSocketFd);
 }
 
 json MessageHandler::handleCubeUpdate(const json& data, sqlite3* db) {
