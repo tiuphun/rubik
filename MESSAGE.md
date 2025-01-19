@@ -57,8 +57,8 @@ The outermost field of a response is:
     "data": {
         "message": "You are signed in",
         "user_type": "ADMIN" | "PLAYER",
-        "player_id": "int", // if user_type is PLAYER
-        "admin_id": "int" // if user_type is ADMIN
+        "player_id": 5, // if user_type is PLAYER
+        "admin_id": 1 // if user_type is ADMIN
     }
 }
 ```
@@ -79,13 +79,13 @@ The outermost field of a response is:
         "message": "Rooms fetched successfully",
         "rooms": [
             {
-                "id": "int",
-                "created_by": "int",
+                "id": 2,
+                "created_by": 1,
                 "created_at": "time_t",
-                "max_players": "int",
-                "max_spectators": "int",
-                "current_players": "int",
-                "current_spectators": "int",
+                "max_players": 2,
+                "max_spectators": 2,
+                "current_players": 2,
+                "current_spectators": 2,
                 "status": "RoomStatus"
             }
         ]
@@ -99,9 +99,9 @@ The outermost field of a response is:
 {
     "type": "CREATE_ROOM",
     "data": {
-        "player_id": "int",
-        "max_players": "int",
-        "max_spectators": "int"
+        "player_id": 2,
+        "max_players": 2,
+        "max_spectators": 2
     }
 }
 ```
@@ -122,8 +122,8 @@ The outermost field of a response is:
 {
     "type": "JOIN_ROOM",
     "data": {
-        "player_id": "int",
-        "room_id": "int",
+        "player_id": 2,
+        "room_id": 2,
         "participant_type": "PLAYER" | "PLAYER_SPECTATOR" | "ADMIN_SPECTATOR"
     }
 }
@@ -146,8 +146,8 @@ The outermost field of a response is:
 {
     "type": "LEAVE_ROOM",
     "data": {
-        "room_id": "int",
-        "participant_id": "int"
+        "room_id": 2,
+        "participant_id": 2
     }
 }
 ```
@@ -179,12 +179,12 @@ The outermost field of a response is:
     "data": {
         "message": "Game session started successfully",
         "session": {
-            "id": "int",
-            "room_id": "int",
-            "player_id": "int",
+            "id": 2,
+            "room_id": 2,
+            "player_id": 2,
             "start_time": "time_t",
             "end_time": "time_t",
-            "total_moves": "int",
+            "total_moves": 2,
             "status": "STARTED" | "ENDED",
             "initial_cube_state": "string",
         }
@@ -211,13 +211,13 @@ The outermost field of a response is:
     "data": {
         "message": "Game session ended",
         "session": {
-            "id": "int",
-            "room_id": "int",
-            "player_id": "int",
+            "id": 1,
+            "room_id": 2,
+            "player_id": 3,
             "start_time": "time_t",
             "end_time": "time_t",
-            "total_moves": "int",
-            "status": "GameSessionStatus",
+            "total_moves": 4,
+            "status": "ENDED",
             "initial_cube_state": "string"
         }
     }
@@ -240,16 +240,16 @@ The outermost field of a response is:
         "message": "Player list retrieved successfully",
         "players": [
             {
-                "id": "int",
+                "id": 1,
                 "username": "string",
                 "join_date": "time_t",
-                "total_games": "int",
-                "wins": "int",
+                "total_games": 5,
+                "wins": 3,
                 "best_time": "float",
                 "avg_time": "float",
-                "status": "PlayerStatus",
+                "status": "ACTIVE" | "BANNED" | "INACTIVE",
                 "ban_date": "time_t",
-                "ban_by": "int"
+                "ban_by": 5 //admin_id
             }
         ]
     }
@@ -304,8 +304,8 @@ The outermost field of a response is:
 {
     "type": "UPDATE_CUBE",
     "data": {
-        "player_id": "int",
-        "game_session_id": "int",
+        "player_id": 2,
+        "game_session_id": 2,
         "new_cube_state": "string"
     }
 }
