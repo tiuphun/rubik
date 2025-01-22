@@ -17,6 +17,16 @@ using namespace std;
 
 Server::Server(){
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    int rc = sqlite3_open(db_path, &db);
+    if (rc != SQLITE_OK) {
+        cerr << "Database init failed: " << sqlite3_errmsg(db) << "\n";
+        close(server_socket);
+        exit(1);
+    }
+    {
+        /* code */
+    }
+    
     if (server_socket == -1) {
         cerr << "Failed to create socket\n";
         exit(1);
@@ -39,13 +49,7 @@ Server::Server(){
 
     cout << "Server listening on port " << PORT << "...\n";
     
-    int rc = sqlite3_open(db_path, &db);
-    if(rc != SQLITE_OK){
-        cerr << "Database init failed: " << sqlite3_errmsg(db) << "\n";
-        close(server_socket);
-        exit(1);
-    }
-    cout << "Database initialization successful!\n"; 
+    
 }
 
 void Server::handleClient(int client_socket) {
@@ -100,6 +104,20 @@ void Server::start() {
         }
         if (pid == 0) {
             close(server_socket);
+
+            sqlite3* child_db;
+            int rc = sqlite3_open(db_path, &child_db);
+            if (rc != SQLITE_OK) {
+                cerr << "Database init failed: " << sqlite3_errmsg(child_db) << "\n";
+                close(client_socket);
+                exit(1);
+            }
+
+            messageHandler = std::make_unique<MessageHandler>(child_db);
+            {
+                /* code */
+            }
+            
             handleClient(client_socket);
             close(client_socket);
             exit(0);

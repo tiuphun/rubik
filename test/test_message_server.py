@@ -24,19 +24,19 @@ if __name__ == "__main__":
     sign_up_request = json.dumps({
         "type": "SIGN_UP",
         "data": {
-            "username": "Phuong",
-            "password": "tieuphuong"
+            "username": "user",
+            "password": "user"
         }
     })
 
     send_request(sign_up_request)
 
     # Example request to sign in
-    sign_in_request = json.dumps({
-        "type": "SIGN_IN",
-        "data": {
-            "username": "Phuong",
-            "password": "tieuphuong"
-        }
-    })
-    send_request(sign_in_request)
+    # sign_in_request = json.dumps({
+    #     "type": "SIGN_IN",
+    #     "data": {
+    #         "username": "user",
+    #         "password": "user"
+    #     }
+    # })
+    # send_request(sign_in_request)

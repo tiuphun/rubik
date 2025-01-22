@@ -13,6 +13,7 @@ public:
     bool updateAdminLastLogin(int id);
     sqlite3* getDb() const { return db; }
     bool banPlayer(int playerId, int adminId);
+    bool registerAdmin(const string& username, const string& password_hash );
 
 private:
     sqlite3* db;

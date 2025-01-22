@@ -23,6 +23,29 @@ Admin AdminRepository::getAdminById(int id) {
     return admin;
 }
 
+bool AdminRepository::registerAdmin(const string& username, const string& password_hash ){
+    const char* sql = Query::INSERT_ADMIN;
+    sqlite3_stmt* stmt = nullptr;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        cerr << "Error: Failed to prepare statement to check if admin is taken: " 
+             << sqlite3_errmsg(db) << endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, password_hash.c_str(), -1, SQLITE_STATIC);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+    return true;
+}
+
 Admin AdminRepository::createAdminFromStmt(sqlite3_stmt* stmt) {
     int id = sqlite3_column_int(stmt, 0);
     std::string username = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));

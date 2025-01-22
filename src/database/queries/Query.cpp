@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS Player (
     wins INTEGER DEFAULT 0,
     best_time REAL DEFAULT 0,
     avg_time REAL DEFAULT 0,
-    status TEXT DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE', 'BANNED')),
+    status TEXT DEFAULT 'INACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE', 'BANNED')),
     ban_date DATETIME,
     ban_by INTEGER,
     FOREIGN KEY (ban_by) REFERENCES Admin(id)
@@ -165,8 +165,8 @@ const char* Query::FIND_AUTH_USER_BY_STATUS =
     "SELECT account_status FROM AuthUsers WHERE username = ? LIMIT 1;";
 
 const char* Query::INSERT_ADMIN = 
-    "INSERT INTO Admin(id,username,password_hash) "
-    "VALUES(?,?,?);";
+    "INSERT INTO Admin(username,password_hash) "
+    "VALUES(?,?);";
 
 const char* Query::SELECT_ALL_ADMIN =
     "SELECT * FROM Admin;";
