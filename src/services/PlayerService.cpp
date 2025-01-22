@@ -10,43 +10,49 @@ using namespace std::chrono;
 using namespace std;
 
 nlohmann::json PlayerService::createRoom(int playerId, int max_players, int max_spectators) {
-    // Get player from entitymanager vector
-    auto* player = entityManager.getPlayerById(playerId);
-    if (!player) {
-        return MessageCrafter::craftResponse("error", {{"message", "Player not found"}});
-    }
+    // // Get player from entitymanager vector
+    // auto* player = entityManager.getPlayerById(playerId);
+    // if (!player) {
+    //     return MessageCrafter::craftResponse("error", {{"message", "Player not found"}});
+    // }
 
-    auto now = system_clock::now();
-    auto nowTimeT = system_clock::to_time_t(now);
+    // auto now = system_clock::now();
+    // auto nowTimeT = system_clock::to_time_t(now);
 
-    // Create room and add to EntityManager
-    auto room = make_unique<Room>(
-        entityManager.getNextRoomId(),
-        playerId,
-        nowTimeT,
-        max_players,
-        max_spectators,
-        RoomStatus::WAITING,
-        1,
-        0
-    );
+    // // Create room and add to EntityManager
+    // auto room = make_unique<Room>(
+    //     entityManager.getNextRoomId(),
+    //     playerId,
+    //     nowTimeT,
+    //     max_players,
+    //     max_spectators,
+    //     RoomStatus::WAITING,
+    //     1,
+    //     0
+    // );
 
-    int roomId = room->id;
-    entityManager.addRoom(std::move(room));
-    // New player is also the new RoomParticipant
-    auto participant = make_unique<RoomParticipant>(
-        roomId,
-        RoomParticipantStatus::PLAYER,
-        playerId,
-        false
-    );
+    // int roomId = room->id;
+    // entityManager.addRoom(std::move(room));
+    // // New player is also the new RoomParticipant
+    // auto participant = make_unique<RoomParticipant>(
+    //     roomId,
+    //     RoomParticipantStatus::PLAYER,
+    //     playerId,
+    //     false
+    // );
 
-    entityManager.addRoomParticipant(std::move(participant));
-   
+    // entityManager.addRoomParticipant(std::move(participant));
+    
 
+    // return MessageCrafter::craftResponse("success", {
+    //     {"message", "Room created successfully"},
+    //     {"room_id", }
+    // });
+
+    
     return MessageCrafter::craftResponse("success", {
         {"message", "Room created successfully"},
-        {"room_id", roomId}
+        {"room_id", 1}
     });
 }
 
@@ -97,8 +103,19 @@ nlohmann::json PlayerService::joinRoom(int playerId, int roomId, RoomParticipant
         room->current_spectators++;
     }
 
+    nlohmann::json roomsJson = {
+        {"id", 1},
+        {"created_by", 1},
+        {"created_at", 1},
+        {"max_players", 1},
+        {"max_spectators", 1},
+        {"current_players", 1},
+        {"current_spectators", 0},
+        {"status", 1}
+    };
     return MessageCrafter::craftResponse("success", {
-        {"message", "Joined room successfully"}
+        {"message", "Player joined room successfully"},
+        {"rooms", roomsJson}
     });
 }
 
@@ -124,6 +141,19 @@ nlohmann::json PlayerService::viewRoomList() {
         }
     }
 
+    // return MessageCrafter::craftResponse("success", {
+    //     {"rooms", roomsJson}
+    // });
+    roomsJson = {
+        {"id", 1},
+        // {"created_by", 1},
+        // {"created_at", 1},
+        {"max_players", 1},
+        {"max_spectators", 1},
+        {"current_players", 1},
+        {"current_spectators", 0},
+        {"status", "WAITING"}
+    };
     return MessageCrafter::craftResponse("success", {
         {"rooms", roomsJson}
     });
